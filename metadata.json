@@ -1,0 +1,6 @@
+{
+  "name": "OneGold",
+  "description": "Enterprise-grade digital commerce platform for buying, selling, pawning, appraising, and auctioning physical gold, luxury jewelry, and raw precious metals, powered by OneChannelAdmin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

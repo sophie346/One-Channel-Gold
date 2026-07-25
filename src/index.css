@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-gold-light: #E3C27A;
+  --color-gold-base: #C8A45D;
+  --color-gold-dark: #8F6A32;
+  --color-neutral-darker: #080A0D;
+  --color-[#080A0D]: #080A0D;
+  --color-[#11141A]: #11141A;
+  --color-[#171A21]: #171A21;
+  --color-[#F7F4EC]: #F7F4EC;
+  --color-[#C8A45D]: #C8A45D;
+  --color-[#E3C27A]: #E3C27A;
+  --color-[#8F6A32]: #8F6A32;
+  --color-[#AEB4C0]: #AEB4C0;
+  --color-[#2F9D70]: #2F9D70;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #080A0D;
+  color: #AEB4C0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom fine typography and tracking utility transitions */
+.letter-spacing-wide {
+  letter-spacing: 0.15em;
+}
+
+.letter-spacing-widest {
+  letter-spacing: 0.3em;
+}
+
+/* Fade in animation styles */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
