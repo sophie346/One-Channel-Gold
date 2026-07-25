@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Search, TrendingUp } from 'lucide-react';
+import { Menu, X, Search, TrendingUp, ShoppingBag } from 'lucide-react';
 
 interface NavigationProps {
   currentTab: string;
@@ -21,6 +21,8 @@ export default function Navigation({
   setSearchQuery,
   userSession,
   logOut,
+  cartCount,
+  openCart,
 }: NavigationProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -112,6 +114,20 @@ export default function Navigation({
               aria-label="Search"
             >
               <Search className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            </button>
+
+            {/* Cart */}
+            <button
+              onClick={openCart}
+              className="relative p-1.5 text-[#D1D5DB] hover:text-white transition-colors cursor-pointer"
+              aria-label="Cart"
+            >
+              <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.75} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-[#C5A059] text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </button>
 
             {/* Sign In */}

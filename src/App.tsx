@@ -1,44 +1,49 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { usePathname, useRouter } from 'next/navigation';
 import {
-  ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert, ShoppingCart
+  ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert
 } from 'lucide-react';
-import Navigation from './components/Navigation';
-import Footer from './components/Footer';
-import HomePage from './components/HomePage';
-import AuthModal from './components/AuthModal';
-import GoldCalculator from './components/GoldCalculator';
-import GoldPriceChart from './components/GoldPriceChart';
-import ShopView from './components/ShopView';
-import AuctionsView from './components/AuctionsView';
-import ServicesView from './components/ServicesView';
-import WorkflowsView from './components/WorkflowsView';
-import WholesaleAndStorage from './components/WholesaleAndStorage';
-import StaticPages from './components/StaticPages';
-import PortalDashboard from './components/PortalDashboard';
-import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from './data/mockData';
-import { PawnLoan, SellGoldOffer } from './types';
-import { pathToTab, tabToPath } from './routes';
-import { useAppDispatch, useAppSelector } from './store/hooks';
-import { logoutUser, clearAuthError } from './store/authSlice';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import HomePage from '@/components/HomePage';
+import AuthModal from '@/components/AuthModal';
+import GoldCalculator from '@/components/GoldCalculator';
+import GoldPriceChart from '@/components/GoldPriceChart';
+import ShopView from '@/components/ShopView';
+import ProductDetailsPage from '@/components/ProductDetailsPage';
+import CartPage from '@/components/CartPage';
+import CheckoutPage from '@/components/CheckoutPage';
+import AuctionsView from '@/components/AuctionsView';
+import ServicesView from '@/components/ServicesView';
+import WorkflowsView from '@/components/WorkflowsView';
+import WholesaleAndStorage from '@/components/WholesaleAndStorage';
+import StaticPages from '@/components/StaticPages';
+import PortalDashboard from '@/components/PortalDashboard';
+import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from '@/data/mockData';
+import { PawnLoan, SellGoldOffer } from '@/types';
+import { pathToTab, tabToPath, getProductSlug } from '@/routes';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logoutUser, clearAuthError } from '@/store/authSlice';
+import { selectCartCount, selectCartItems } from '@/store/cartSlice';
 
 export default function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
-  const currentTab = pathToTab(location.pathname);
+  const currentTab = pathToTab(pathname || '/');
+  const productSlug = getProductSlug(pathname || '/');
+  const cartCount = useAppSelector(selectCartCount);
+  const cartItems = useAppSelector(selectCartItems);
 
   const setCurrentTab = (tab: string) => {
-    navigate(tabToPath(tab));
+    router.push(tabToPath(tab));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeWorkflow, setActiveWorkflow] = useState<'sell' | 'pawn' | 'appraisal' | null>(null);
-  
-  // Shopping Cart & Checkout states
-  const [cart, setCart] = useState<any[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
 
   const { user, isLoggedIn } = useAppSelector((state) => state.auth);
@@ -65,26 +70,6 @@ export default function App() {
     setTimeout(() => {
       setNotification(null);
     }, 5000);
-  };
-
-  // Action callbacks
-  const handleAddToCart = (product: any) => {
-    setCart(prev => [...prev, product]);
-    setCartOpen(true);
-  };
-
-  const handleRemoveFromCart = (index: number) => {
-    setCart(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const executeCheckout = () => {
-    if (cart.length === 0) return;
-    // Transfer cart items to orders
-    setOrders(prev => [...prev, ...cart]);
-    setCart([]);
-    setCartOpen(false);
-    setCurrentTab('portal');
-    showNotification('Insured secure checkout successfully authorized! Your 1CA logistic routing dispatch has been scheduled.', 'success');
   };
 
   const handleWatchLot = (lotId: string) => {
@@ -149,15 +134,15 @@ export default function App() {
       
       {/* Navigation Header bar */}
       <Navigation
-        currentTab={currentTab}
+        currentTab={currentTab === 'product' ? 'buy' : currentTab}
         setCurrentTab={setCurrentTab}
         openAuth={executeAuthOpen}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         userSession={userSession}
         logOut={logOut}
-        cartCount={cart.length}
-        openCart={() => setCartOpen(true)}
+        cartCount={cartCount}
+        openCart={() => router.push('/cart')}
       />
 
       {/* Primary Layout Router Container */}
@@ -172,16 +157,36 @@ export default function App() {
           />
         )}
 
+        {/* ==================== PRODUCT DETAILS ==================== */}
+        {currentTab === 'product' && productSlug && (
+          <ProductDetailsPage
+            slug={productSlug}
+            onShowNotification={showNotification}
+          />
+        )}
+
         {/* ==================== SHOP VIEW (BUY GOLD) ==================== */}
         {currentTab === 'buy' && (
           <ShopView
-            onAddToCart={handleAddToCart}
-            onBuyNow={(prod) => { handleAddToCart(prod); setCartOpen(true); }}
-            wishlist={[]}
-            toggleWishlist={() => {}}
-            selectedProductId={null}
-            setSelectedProductId={() => {}}
+            wishlist={watchlist}
+            toggleWishlist={handleWatchLot}
             searchQuery={searchQuery}
+            onShowNotification={showNotification}
+          />
+        )}
+
+        {/* ==================== CART ==================== */}
+        {currentTab === 'cart' && <CartPage />}
+
+        {/* ==================== CHECKOUT ==================== */}
+        {currentTab === 'checkout' && (
+          <CheckoutPage
+            isLoggedIn={isLoggedIn}
+            openAuth={() => executeAuthOpen('signin')}
+            onShowNotification={showNotification}
+            onOrderComplete={(orderItems) => {
+              setOrders((prev) => [...prev, ...orderItems]);
+            }}
           />
         )}
 
@@ -348,7 +353,7 @@ export default function App() {
         {currentTab === 'portal' && (
           <PortalDashboard
             userSession={userSession}
-            cart={cart}
+            cart={cartItems}
             orders={orders}
             goldSales={goldSales}
             pawnLoans={pawnLoans}
@@ -373,76 +378,6 @@ export default function App() {
           onSubmit={handleWorkflowSubmit}
           onShowNotification={showNotification}
         />
-      )}
-
-      {/* ==================== SHOPPING CART COMPREHENSIVE DRAWER ==================== */}
-      {cartOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop */}
-          <div onClick={() => setCartOpen(false)} className="absolute inset-0 bg-[#080A0D]/80 backdrop-blur-sm transition-opacity"></div>
-          
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-[#171A21] border-l border-[rgba(255,255,255,0.08)] flex flex-col justify-between shadow-2xl">
-              
-              {/* Header */}
-              <div className="p-6 bg-[#11141A] border-b border-[rgba(255,255,255,0.06)] flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-[#C8A45D]" />
-                  <h3 className="text-sm font-black text-[#F7F4EC] uppercase tracking-wider">Secured Cart ({cart.length})</h3>
-                </div>
-                <button onClick={() => setCartOpen(false)} className="p-1 text-[#AEB4C0] hover:text-[#F7F4EC] cursor-pointer"><X className="w-5 h-5" /></button>
-              </div>
-
-              {/* Items List */}
-              <div className="p-6 overflow-y-auto flex-1 space-y-4">
-                {cart.length > 0 ? (
-                  cart.map((item, idx) => (
-                    <div key={idx} className="flex gap-4 p-3 bg-[#11141A] rounded-lg border border-[rgba(255,255,255,0.04)] text-xs">
-                      <img src={item.image} alt={item.name} referrerPolicy="no-referrer" className="w-12 h-12 object-cover rounded" />
-                      <div className="flex-1 space-y-1">
-                        <p className="font-bold text-[#F7F4EC]">{item.name}</p>
-                        <p className="text-[10px] text-[#AEB4C0]/70">{item.weight}g • {item.karat} purity</p>
-                        <p className="font-bold text-[#E3C27A]">${item.price.toLocaleString()}</p>
-                      </div>
-                      <button onClick={() => handleRemoveFromCart(idx)} className="p-1 hover:bg-white/5 rounded text-red-400 font-bold self-start cursor-pointer">Remove</button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12 text-xs text-[#AEB4C0] space-y-2">
-                    <p className="font-bold text-[#F7F4EC]">Your cart is currently empty.</p>
-                    <p className="opacity-75">Add certified investment bullion bars or custom jewelry rings to execute insured checkout logistics.</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Summary Checkout Footer */}
-              <div className="p-6 bg-[#11141A] border-t border-[rgba(255,255,255,0.06)] space-y-4 shrink-0">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#AEB4C0] uppercase">Subtotal Price</span>
-                  <span className="font-black text-lg text-[#F7F4EC]">
-                    ${cart.reduce((acc, item) => acc + item.price, 0).toLocaleString()}
-                  </span>
-                </div>
-                
-                <div className="p-3 bg-emerald-500/5 rounded border border-emerald-500/15 text-[10px] text-[#2F9D70] leading-normal font-semibold">
-                  Note: Includes 100% value insurance protection during logistics transport with armored shipping protocols.
-                </div>
-
-                <div className="flex gap-3">
-                  <button onClick={() => setCartOpen(false)} className="w-1/3 py-2.5 bg-white/5 rounded text-xs uppercase font-bold text-[#AEB4C0] cursor-pointer">Back</button>
-                  <button
-                    onClick={executeCheckout}
-                    disabled={cart.length === 0}
-                    className="flex-1 py-2.5 bg-[#C8A45D] hover:bg-[#E3C27A] disabled:opacity-30 rounded text-[#080A0D] text-xs font-bold uppercase tracking-widest cursor-pointer"
-                  >
-                    Authorise Checkout
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
       )}
 
       {/* ==================== SIGN-IN / SIGN-UP MODAL ==================== */}

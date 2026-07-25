@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", sans-serif;
-  --font-serif: "Playfair Display", serif;
-  --font-mono: "JetBrains Mono", monospace;
-  
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  --font-serif: var(--font-playfair), "Playfair Display", serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
+
   --color-gold-light: #E3C27A;
   --color-gold-base: #C8A45D;
   --color-gold-dark: #8F6A32;
@@ -28,7 +28,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom fine typography and tracking utility transitions */
 .letter-spacing-wide {
   letter-spacing: 0.15em;
 }
@@ -37,7 +36,6 @@ body {
   letter-spacing: 0.3em;
 }
 
-/* Fade in animation styles */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
