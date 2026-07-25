@@ -10,7 +10,6 @@ export default function Footer({ setCurrentTab, onShowNotification }: FooterProp
 
   const handleLinkClick = (tabId: string) => {
     setCurrentTab(tabId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const columns = [

@@ -44,7 +44,6 @@ export default function Navigation({
   const handleNavClick = (tabId: string) => {
     setCurrentTab(tabId);
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

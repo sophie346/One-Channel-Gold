@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert, ShoppingCart
 } from 'lucide-react';
@@ -16,10 +17,18 @@ import StaticPages from './components/StaticPages';
 import PortalDashboard from './components/PortalDashboard';
 import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from './data/mockData';
 import { PawnLoan, SellGoldOffer } from './types';
+import { pathToTab, tabToPath } from './routes';
 
 export default function App() {
-  // Navigation & View States
-  const [currentTab, setCurrentTab] = useState<string>('home');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentTab = pathToTab(location.pathname);
+
+  const setCurrentTab = (tab: string) => {
+    navigate(tabToPath(tab));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeWorkflow, setActiveWorkflow] = useState<'sell' | 'pawn' | 'appraisal' | null>(null);
   
