@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  ShieldCheck, ArrowRight, TrendingUp, HandCoins, Calendar, Info, Scale, Gavel, HelpCircle,
-  Clock, Award, Lock, Sparkles, CheckCircle2, ChevronRight, X, Flame, ShieldAlert, FileText, ShoppingCart
+  ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert, ShoppingCart
 } from 'lucide-react';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
+import HomePage from './components/HomePage';
 import GoldCalculator from './components/GoldCalculator';
 import GoldPriceChart from './components/GoldPriceChart';
 import ShopView from './components/ShopView';
@@ -14,7 +14,7 @@ import WorkflowsView from './components/WorkflowsView';
 import WholesaleAndStorage from './components/WholesaleAndStorage';
 import StaticPages from './components/StaticPages';
 import PortalDashboard from './components/PortalDashboard';
-import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM, IMAGES } from './data/mockData';
+import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from './data/mockData';
 import { PawnLoan, SellGoldOffer } from './types';
 
 export default function App() {
@@ -30,9 +30,9 @@ export default function App() {
 
   // User Authentication states
   const [userSession, setUserSession] = useState({
-    isLoggedIn: true,
-    name: 'Marcus Aurelius',
-    email: 'marcus@rome.com'
+    isLoggedIn: false,
+    name: '',
+    email: ''
   });
   const [authModal, setAuthModal] = useState<'signin' | 'register' | null>(null);
 
@@ -137,7 +137,7 @@ export default function App() {
   };
 
   return (
-    <div className="bg-[#080A0D] min-h-screen text-[#AEB4C0] selection:bg-[#C8A45D]/30 selection:text-[#E3C27A]">
+    <div className="bg-[#0A0A0A] min-h-screen text-[#9CA3AF] selection:bg-[#C8A45D]/30 selection:text-[#E3C27A]">
       
       {/* Navigation Header bar */}
       <Navigation
@@ -153,146 +153,15 @@ export default function App() {
       />
 
       {/* Primary Layout Router Container */}
-      <main className="pt-[80px] pb-12">
+      <main className="pt-[72px]">
         
         {/* ==================== HOME VIEW ==================== */}
         {currentTab === 'home' && (
-          <div className="space-y-24 animate-fade-in">
-            {/* Elegant Display Hero */}
-            <section className="relative px-4 md:px-6 pt-12 pb-20 overflow-hidden">
-              {/* Abstract decorative accent behind hero */}
-              <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[380px] bg-[#C8A45D]/5 rounded-full blur-3xl pointer-events-none"></div>
-
-              <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-                <div className="flex gap-2 items-center justify-center text-[#8F6A32] uppercase text-[10px] tracking-[0.3em] font-bold">
-                  <span className="w-8 h-[1px] bg-[#8F6A32]"></span> LBMA Refinery Compliance &bull; Secure Physical Custody
-                </div>
-                
-                <h1 className="text-5xl md:text-7xl font-light text-[#F7F4EC] tracking-tighter leading-[0.9] max-w-4xl mx-auto">
-                  The Future of <span className="italic font-serif text-[#C8A45D]">Precious Metals</span> Is Unified.
-                </h1>
-                
-                <p className="text-sm md:text-lg text-[#AEB4C0] max-w-2xl mx-auto leading-relaxed font-light">
-                  OneGold integrates independent physical metallurgy assaying with live global pricing desks. Sell, pawn, store, or buy gold backed by the robust <strong className="font-semibold text-white">OneChannelAdmin (1CA)</strong> ledger.
-                </p>
-
-                <div className="flex flex-col sm:flex-row justify-center gap-4 pt-6">
-                  <button
-                    onClick={() => setActiveWorkflow('sell')}
-                    className="border border-[#C8A45D] text-[#C8A45D] text-[12px] uppercase tracking-widest px-8 py-4 font-bold hover:bg-[#C8A45D] hover:text-black transition-colors rounded-sm cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    Sell Your Gold <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setCurrentTab('buy')}
-                    className="bg-white/5 text-white text-[12px] uppercase tracking-widest px-8 py-4 font-bold border border-white/10 rounded-sm hover:bg-white/10 transition-colors cursor-pointer"
-                  >
-                    Buy Fine Bullion
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* LIVE MARKET BENCHMARK - CHART + CALCULATOR DUAL PANEL */}
-            <section className="max-w-7xl mx-auto px-4 md:px-6">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                
-                {/* SVG Live gold ticker chart */}
-                <div className="lg:col-span-8 shadow-2xl rounded-xl overflow-hidden">
-                  <GoldPriceChart />
-                </div>
-
-                {/* Instant Valuation Quick Calculator */}
-                <div className="lg:col-span-4 shadow-2xl rounded-xl overflow-hidden">
-                  <GoldCalculator />
-                </div>
-
-              </div>
-            </section>
-
-            {/* BENTO CAPABILITIES STORIES */}
-            <section className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
-              <div className="text-center max-w-2xl mx-auto space-y-2">
-                <span className="text-[10px] uppercase tracking-widest text-[#8F6A32] font-bold">Comprehensive Capabilities</span>
-                <h3 className="text-2xl md:text-3xl font-light text-[#F7F4EC] tracking-tight">One integrated precious metals environment</h3>
-                <p className="text-xs text-[#AEB4C0] leading-relaxed">No secondary accounts. OneChannelAdmin orchestrates asset registries from laboratory intake to liquidation.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: 'Secured Pawn Loans',
-                    desc: 'Unlock immediate liquidity using physical jewelry or bullion collateral. Interest rates are fixed at compliant terms under state mandates. No credit impact.',
-                    action: 'Initiate Loan Assessment',
-                    id: 'pawn',
-                    num: '01'
-                  },
-                  {
-                    title: 'Live Auction Liquidations',
-                    desc: 'Acquire estate diamond rings, antique gold chains, and certified bullion coins below market values from pawn structural defaults or private consignments.',
-                    action: 'Explore Marketplace',
-                    id: 'auctions',
-                    num: '02'
-                  },
-                  {
-                    title: 'Bespoke Jewelry Lab',
-                    desc: 'Translate sketches or existing family heirlooms into matching-purity yellow gold masterpieces with 3D CAD modeling, wax casting, and micro-gemstone settings.',
-                    action: 'Schedule CAD Design',
-                    id: 'services',
-                    num: '03'
-                  }
-                ].map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="group bg-[#11141A] border border-white/10 rounded-sm p-6 flex flex-col justify-between space-y-8 hover:border-[#C8A45D]/30 hover:bg-[#11141A]/80 transition-all duration-300"
-                  >
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-mono text-[#C8A45D]/40 font-bold uppercase tracking-widest">{item.num} // SERVICE</span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#C8A45D]/20 group-hover:bg-[#C8A45D]/60 transition-colors duration-300"></div>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-bold uppercase tracking-widest text-[#F7F4EC] group-hover:text-[#E3C27A] transition-colors duration-200">{item.title}</h4>
-                        <p className="text-xs text-[#AEB4C0]/80 leading-relaxed font-light">{item.desc}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (item.id === 'pawn') setActiveWorkflow('pawn');
-                        else setCurrentTab(item.id);
-                      }}
-                      className="text-[11px] font-bold text-[#C8A45D] hover:text-[#E3C27A] flex items-center gap-1.5 cursor-pointer uppercase tracking-widest transition-colors duration-200 self-start mt-2"
-                    >
-                      <span>{item.action}</span>
-                      <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 1CA REAL-TIME METRICS AUDIT FEED */}
-            <section className="max-w-7xl mx-auto px-4 md:px-6 pt-16 pb-8 border-t border-white/10">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-left">
-                <div className="space-y-1">
-                  <div className="text-[32px] font-light text-[#F7F4EC] tracking-tight">$420M+</div>
-                  <div className="text-[10px] uppercase text-[#AEB4C0] tracking-widest font-semibold">Total Stored Capital</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-[32px] font-light text-[#2F9D70] tracking-tight">99.98%</div>
-                  <div className="text-[10px] uppercase text-[#AEB4C0] tracking-widest font-semibold">Assay Precision Match</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-[32px] font-light text-[#F7F4EC] tracking-tight">14k+</div>
-                  <div className="text-[10px] uppercase text-[#AEB4C0] tracking-widest font-semibold">Active Pawn Loans</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-[32px] font-light text-[#C8A45D] tracking-tight">$150k</div>
-                  <div className="text-[10px] uppercase text-[#AEB4C0] tracking-widest font-semibold">Transit Insurance Cap</div>
-                </div>
-              </div>
-            </section>
-          </div>
+          <HomePage
+            setCurrentTab={setCurrentTab}
+            setActiveWorkflow={setActiveWorkflow}
+            openAuth={(type) => setAuthModal(type)}
+          />
         )}
 
         {/* ==================== SHOP VIEW (BUY GOLD) ==================== */}
