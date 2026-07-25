@@ -120,7 +120,7 @@ export default function Navigation({
                 onClick={() => handleNavClick('portal')}
                 className="hidden sm:inline-flex text-[14px] font-medium text-white hover:text-[#C5A059] transition-colors cursor-pointer"
               >
-                {userSession.name.split(' ')[0]}
+                {userSession.name?.split(' ')[0] || 'Account'}
               </button>
             ) : (
               <button

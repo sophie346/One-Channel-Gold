@@ -6,6 +6,7 @@ import {
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
+import AuthModal from './components/AuthModal';
 import GoldCalculator from './components/GoldCalculator';
 import GoldPriceChart from './components/GoldPriceChart';
 import ShopView from './components/ShopView';
@@ -18,10 +19,13 @@ import PortalDashboard from './components/PortalDashboard';
 import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from './data/mockData';
 import { PawnLoan, SellGoldOffer } from './types';
 import { pathToTab, tabToPath } from './routes';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { logoutUser, clearAuthError } from './store/authSlice';
 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const currentTab = pathToTab(location.pathname);
 
   const setCurrentTab = (tab: string) => {
@@ -37,12 +41,13 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
 
-  // User Authentication states
-  const [userSession, setUserSession] = useState({
-    isLoggedIn: false,
-    name: '',
-    email: ''
-  });
+  const { user, isLoggedIn } = useAppSelector((state) => state.auth);
+  const userSession = {
+    isLoggedIn,
+    name: user?.name || '',
+    email: user?.email || '',
+    uid: user?.uid || '',
+  };
   const [authModal, setAuthModal] = useState<'signin' | 'register' | null>(null);
 
   // Business Domain State lists
@@ -128,21 +133,15 @@ export default function App() {
     }
   };
 
-  const executeAuth = (e: React.FormEvent, mode: 'signin' | 'register') => {
-    e.preventDefault();
-    setUserSession({
-      isLoggedIn: true,
-      name: mode === 'signin' ? 'Marcus Aurelius' : 'New Gold Investor',
-      email: 'marcus@rome.com'
-    });
-    setAuthModal(null);
-    showNotification(`${mode === 'signin' ? 'Login' : 'Registration'} successful! Access keys mapped to 1CA.`, 'success');
+  const executeAuthOpen = (type: 'signin' | 'register') => {
+    dispatch(clearAuthError());
+    setAuthModal(type);
   };
 
-  const logOut = () => {
-    setUserSession({ isLoggedIn: false, name: '', email: '' });
+  const logOut = async () => {
+    await dispatch(logoutUser());
     setCurrentTab('home');
-    showNotification('Successfully logged out from OneGold terminal.', 'info');
+    showNotification('Successfully logged out from OneGold.', 'info');
   };
 
   return (
@@ -152,7 +151,7 @@ export default function App() {
       <Navigation
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        openAuth={(type) => setAuthModal(type)}
+        openAuth={executeAuthOpen}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         userSession={userSession}
@@ -169,7 +168,7 @@ export default function App() {
           <HomePage
             setCurrentTab={setCurrentTab}
             setActiveWorkflow={setActiveWorkflow}
-            openAuth={(type) => setAuthModal(type)}
+            openAuth={executeAuthOpen}
           />
         )}
 
@@ -448,53 +447,18 @@ export default function App() {
 
       {/* ==================== SIGN-IN / SIGN-UP MODAL ==================== */}
       {authModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A0D]/85 backdrop-blur-md">
-          <div className="bg-[#171A21] border border-[#C8A45D] w-full max-w-sm rounded-xl overflow-hidden shadow-2xl">
-            <div className="p-5 bg-[#11141A] border-b border-white/5 flex justify-between items-center">
-              <h4 className="text-xs font-black text-[#F7F4EC] uppercase tracking-wider">
-                {authModal === 'signin' ? 'Access 1CA Gateway' : 'Create Secure Investor Vault'}
-              </h4>
-              <button onClick={() => setAuthModal(null)} className="p-1.5 hover:bg-white/5 rounded-full text-[#AEB4C0] cursor-pointer"><X className="w-5 h-5" /></button>
-            </div>
-
-            <form onSubmit={(e) => executeAuth(e, authModal)} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">Regulatory Email Address</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="e.g. investor@vault.com"
-                  className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-xs text-[#F7F4EC]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">Secure Access Passcode</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Minimum 8 characters"
-                  className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-xs text-[#F7F4EC]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] py-2.5 font-bold uppercase tracking-widest rounded-lg cursor-pointer"
-              >
-                {authModal === 'signin' ? 'Verify Credentials' : 'Build Account'}
-              </button>
-
-              <div className="text-center text-[10px] text-[#AEB4C0]/70 pt-2 border-t border-[rgba(255,255,255,0.03)]">
-                {authModal === 'signin' ? (
-                  <p>No account registered? <span onClick={() => setAuthModal('register')} className="text-[#E3C27A] cursor-pointer hover:underline font-bold">Create one today</span></p>
-                ) : (
-                  <p>Already have credentials? <span onClick={() => setAuthModal('signin')} className="text-[#E3C27A] cursor-pointer hover:underline font-bold">Sign in here</span></p>
-                )}
-              </div>
-            </form>
-          </div>
-        </div>
+        <AuthModal
+          mode={authModal}
+          onClose={() => {
+            dispatch(clearAuthError());
+            setAuthModal(null);
+          }}
+          onSwitchMode={(mode) => {
+            dispatch(clearAuthError());
+            setAuthModal(mode);
+          }}
+          onSuccess={(message) => showNotification(message, 'success')}
+        />
       )}
 
       {/* ==================== GLOBAL NOTIFICATION TOAST ==================== */}
