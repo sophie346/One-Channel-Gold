@@ -1,0 +1,40 @@
+# Build and push: gcr.io/gentle-epoch-277301/onechanneladmin-gold:latest
+#
+# From One-Channel-Gold repo root:
+#   gcloud builds submit --config=cloudbuild.yaml --project=gentle-epoch-277301 .
+#
+# Then roll the GKE deployment (in onechanneladmin-latest):
+#   kubectl apply -f deploymentsAll/ui/deployment-onechanneladmin-gold.yaml
+#   kubectl rollout restart deployment/onechanneladmin-gold
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="gcr.io/${PROJECT_ID}/onechanneladmin-gold"
+        TAG="${SHORT_SHA:-manual}"
+        docker pull "$$IMAGE:latest" || true
+        docker build \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          --cache-from "$$IMAGE:latest" \
+          -t "$$IMAGE:latest" \
+          -t "$$IMAGE:$$TAG" \
+          -f Dockerfile \
+          .
+        docker push "$$IMAGE:latest"
+        docker push "$$IMAGE:$$TAG"
+
+images:
+  - gcr.io/$PROJECT_ID/onechanneladmin-gold:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+  diskSizeGb: 50
+
+timeout: 3600s
