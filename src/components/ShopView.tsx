@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye } from 'lucide-react';
+import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2 } from 'lucide-react';
 import { Product } from '../types';
-import { INITIAL_PRODUCTS } from '../data/mockData';
 import { useAppDispatch } from '@/store/hooks';
 import { addToCart } from '@/store/cartSlice';
+import { productSearch } from '@/services/productService';
+import { mapApiProductToProduct } from '@/utils/mapProduct';
 
 interface ShopViewProps {
   wishlist: string[];
@@ -27,9 +28,14 @@ export default function ShopView({
   const [selectedKarat, setSelectedKarat] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [selectedCondition, setSelectedCondition] = useState<string>('all');
-  const [priceRange, setPriceRange] = useState<number>(5000);
+  const [priceRange, setPriceRange] = useState<number>(10000);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = [
     { label: 'All Catalog', value: 'all' },
@@ -42,31 +48,66 @@ export default function ShopView({
     { label: 'Estate / Antique', value: 'antique' },
   ];
 
-  const filteredProducts = useMemo(() => {
-    return INITIAL_PRODUCTS.filter((product) => {
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(query);
-        const matchesDesc = product.description.toLowerCase().includes(query);
-        const matchesKarat = product.karat.toLowerCase().includes(query);
-        if (!matchesName && !matchesDesc && !matchesKarat) return false;
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      const sortprice =
+        sortBy === 'price-asc' ? 'asc' : sortBy === 'price-desc' ? 'desc' : '';
+
+      const result = await productSearch({
+        page: 0,
+        limit: 48,
+        text: searchQuery || '',
+        category: activeCategory !== 'all' ? activeCategory : '',
+        maxPrice: priceRange < 10000 ? priceRange : '',
+        sortprice: sortprice as 'asc' | 'desc' | '',
+        showcount: true,
+      });
+
+      if (cancelled) return;
+
+      if (result.error) {
+        setProducts([]);
+        setTotalProducts(0);
+        setError(result.message || 'Failed to load products');
+        setLoading(false);
+        return;
       }
-      if (activeCategory !== 'all' && product.category !== activeCategory) return false;
-      if (selectedKarat !== 'all' && product.karat !== selectedKarat) return false;
-      if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
-      if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
-      if (product.price > priceRange) return false;
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === 'price-asc') return a.price - b.price;
-      if (sortBy === 'price-desc') return b.price - a.price;
-      if (sortBy === 'weight-desc') return b.weight - a.weight;
-      return 0;
-    });
-  }, [activeCategory, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy, searchQuery]);
+
+      setProducts(result.productsList.map(mapApiProductToProduct));
+      setTotalProducts(result.totalProducts);
+      setLoading(false);
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchQuery, activeCategory, priceRange, sortBy]);
+
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        if (selectedKarat !== 'all' && product.karat !== selectedKarat) return false;
+        if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
+        if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'weight-desc') return b.weight - a.weight;
+        return 0;
+      });
+  }, [products, selectedKarat, selectedColor, selectedCondition, sortBy]);
 
   const openProduct = (product: Product) => {
-    router.push(`/buy/${product.slug}`);
+    const path = product.slug
+      ? `/buy/${encodeURIComponent(product.slug)}`
+      : `/buy/product?sku=${encodeURIComponent(product.osku || product.sku || product.id)}`;
+    router.push(path);
   };
 
   const handleAddToCart = (product: Product) => {
@@ -79,7 +120,7 @@ export default function ShopView({
     setSelectedKarat('all');
     setSelectedColor('all');
     setSelectedCondition('all');
-    setPriceRange(5000);
+    setPriceRange(10000);
     setSortBy('featured');
   };
 
@@ -202,7 +243,25 @@ export default function ShopView({
           </div>
 
           <div className="lg:col-span-9">
-            {filteredProducts.length > 0 ? (
+            {!loading && !error && (
+              <p className="text-[11px] text-[#AEB4C0] mb-4 uppercase tracking-wider">
+                {filteredProducts.length}
+                {totalProducts > filteredProducts.length ? ` of ${totalProducts}` : ''} assets
+              </p>
+            )}
+
+            {loading ? (
+              <div className="p-16 flex flex-col items-center gap-3 text-[#AEB4C0]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#C8A45D]" />
+                <p className="text-sm">Loading catalog…</p>
+              </div>
+            ) : error ? (
+              <div className="p-12 text-center bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-3">
+                <ShieldAlert className="w-8 h-8 text-[#D29B3C] mx-auto" />
+                <h3 className="text-sm font-bold text-[#F7F4EC] uppercase">Catalog unavailable</h3>
+                <p className="text-xs text-[#AEB4C0] max-w-sm mx-auto">{error}</p>
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
                   const isWishlisted = wishlist.includes(product.id);
@@ -213,20 +272,30 @@ export default function ShopView({
                     >
                       <div className="aspect-square bg-[#080A0D] overflow-hidden relative">
                         <button onClick={() => openProduct(product)} className="w-full h-full cursor-pointer">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-[#AEB4C0]">
+                              No image
+                            </div>
+                          )}
                         </button>
                         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 pointer-events-none">
-                          <span className="text-[9px] uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
-                            {product.karat} Pure
-                          </span>
-                          <span className="text-[9px] uppercase bg-[#11141A]/90 text-[#AEB4C0] font-semibold px-2 py-0.5 rounded tracking-wide border border-white/5">
-                            {product.weight}g
-                          </span>
+                          {product.karat && (
+                            <span className="text-[9px] uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
+                              {product.karat} Pure
+                            </span>
+                          )}
+                          {product.weight > 0 && (
+                            <span className="text-[9px] uppercase bg-[#11141A]/90 text-[#AEB4C0] font-semibold px-2 py-0.5 rounded tracking-wide border border-white/5">
+                              {product.weight}g
+                            </span>
+                          )}
                         </div>
                         <button
                           onClick={() => toggleWishlist(product.id)}

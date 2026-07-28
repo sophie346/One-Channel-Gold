@@ -9,6 +9,7 @@ export interface Product {
   hallmark: string; // e.g. "BIS 916", "Fed Hallmarked"
   price: number;
   image: string;
+  images?: string[];
   description: string;
   certificateStatus: 'Verified' | 'Pending' | 'None';
   certificateNumber?: string;
@@ -16,6 +17,11 @@ export interface Product {
   metalColor: 'Yellow Gold' | 'White Gold' | 'Rose Gold' | 'Multi-Tone';
   condition: 'Brand New' | 'Excellent' | 'Vintage' | 'Estate';
   size?: string;
+  /** API fields preserved for cart / deep links */
+  osku?: string;
+  sku?: string;
+  brand?: string;
+  compareAtPrice?: number | null;
 }
 
 export interface AuctionLot {
