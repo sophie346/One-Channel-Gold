@@ -21,7 +21,7 @@ import WorkflowsView from '@/components/WorkflowsView';
 import WholesaleAndStorage from '@/components/WholesaleAndStorage';
 import StaticPages from '@/components/StaticPages';
 import PortalDashboard from '@/components/PortalDashboard';
-import { INITIAL_PAWN_LOANS, DEMO_SPOT_PRICE_GRAM } from '@/data/mockData';
+import { INITIAL_PAWN_LOANS } from '@/data/mockData';
 import { PawnLoan, SellGoldOffer } from '@/types';
 import { pathToTab, tabToPath, getProductSlug } from '@/routes';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -211,18 +211,18 @@ export default function App() {
 
         {/* ==================== SELL GOLD TAB ==================== */}
         {currentTab === 'sell' && (
-          <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-12">
+          <div className="max-w-[1500px] mx-auto px-5 md:px-8 py-10 space-y-12">
             <div className="text-center space-y-4">
-              <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Melt &amp; Assay Refinery Portal</span>
-              <h2 className="text-3xl font-black text-[#F7F4EC] uppercase">Sell Your Gold Directly to our Vaults</h2>
-              <p className="text-xs text-[#AEB4C0] max-w-xl mx-auto leading-relaxed">
+              <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Melt &amp; Assay Refinery Portal</span>
+              <h2 className="text-3xl md:text-4xl font-black text-[#F7F4EC] uppercase">Sell Your Gold Directly to our Vaults</h2>
+              <p className="text-base text-[#AEB4C0] max-w-2xl mx-auto leading-relaxed">
                 We accept jewelry scrap, broken chains, bullion bars, and gold coins. Access our real-time spot index payout and schedule secure mail-in or lobby drop-offs.
               </p>
             </div>
 
             {/* Injected Calculator */}
-            <div className="bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl p-6 max-w-2xl mx-auto">
-              <h3 className="text-xs font-black text-[#F7F4EC] uppercase tracking-widest mb-4">Payout Value Estimator</h3>
+            <div className="w-full">
+              <h3 className="text-base font-black text-[#F7F4EC] uppercase tracking-widest mb-5">Payout Value Estimator</h3>
               <GoldCalculator />
             </div>
 
@@ -230,11 +230,11 @@ export default function App() {
             <div className="text-center">
               <button
                 onClick={() => setActiveWorkflow('sell')}
-                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
+                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-sm font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
               >
                 Initiate Secure Gold selling Contract <ArrowRight className="w-4 h-4" />
               </button>
-              <p className="text-[10px] text-[#AEB4C0] mt-2.5">Required fields: Identity scan verification compliance (AML)</p>
+              <p className="text-[13px] text-[#AEB4C0] mt-2.5">Required fields: Identity scan verification compliance (AML)</p>
             </div>
           </div>
         )}
@@ -243,14 +243,14 @@ export default function App() {
         {currentTab === 'pawn' && (
           <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-12">
             <div className="text-center space-y-4">
-              <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Secured Collateral loans</span>
+              <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Secured Collateral loans</span>
               <h2 className="text-3xl font-black text-[#F7F4EC] uppercase">Gold-Backed cash Liquidity</h2>
-              <p className="text-xs text-[#AEB4C0] max-w-xl mx-auto leading-relaxed">
+              <p className="text-sm text-[#AEB4C0] max-w-xl mx-auto leading-relaxed">
                 Leverage physical gold assets without losing ownership. Our state-compliant pawn loans have fixed annual percentages with absolute insurance protection while stored in our vault bins.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-xs text-[#AEB4C0]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-sm text-[#AEB4C0]">
               <div className="p-5 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-2">
                 <h4 className="font-bold text-[#F7F4EC] uppercase">No Impact on credit</h4>
                 <p className="leading-relaxed">Pawn transactions are completely collateral-backed loans. Defaulting only causes asset liquidation at our auctions and will never affect credit ratings.</p>
@@ -266,11 +266,11 @@ export default function App() {
             <div className="text-center">
               <button
                 onClick={() => setActiveWorkflow('pawn')}
-                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
+                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-sm font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
               >
                 Apply for Pawn Loan Assessment <HandCoins className="w-4 h-4" />
               </button>
-              <p className="text-[10px] text-[#AEB4C0] mt-2.5">Average preliminary approval timeline: under 3 minutes online.</p>
+              <p className="text-[13px] text-[#AEB4C0] mt-2.5">Average preliminary approval timeline: under 3 minutes online.</p>
             </div>
           </div>
         )}
@@ -292,21 +292,21 @@ export default function App() {
         {currentTab === 'appraisal' && (
           <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-12">
             <div className="text-center space-y-4">
-              <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Certified Metallurgy Spectroscopy</span>
+              <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black bg-[#C8A45D]/10 px-3 py-1 rounded">Certified Metallurgy Spectroscopy</span>
               <h2 className="text-3xl font-black text-[#F7F4EC] uppercase">XRF Laboratory Appraisals</h2>
-              <p className="text-xs text-[#AEB4C0] max-w-xl mx-auto leading-relaxed">
+              <p className="text-sm text-[#AEB4C0] max-w-xl mx-auto leading-relaxed">
                 Schedule a direct physical reservation at one of our high-security vault facilities. Receive GIA, ISO, or LBMA certified pedigree appraisals for estate jewelry or bullion bars.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto text-xs text-[#AEB4C0]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto text-sm text-[#AEB4C0]">
               {[
                 { title: 'XRF Spectroscopy', desc: 'Non-destructive chemical analysis mapping element composition percentages.' },
                 { title: 'Hydrostatic Density', desc: 'Checks internal metal cores for tungsten voids without scratching surfaces.' },
                 { title: 'Pedigree Papers', desc: 'Full certification files backed by registered OneChannelAdmin hashes.' }
               ].map((tech, i) => (
                 <div key={i} className="p-4 bg-[#171A21] border border-white/5 rounded-lg space-y-1">
-                  <h4 className="font-bold text-[#F7F4EC] uppercase text-[10px]">{tech.title}</h4>
+                  <h4 className="font-bold text-[#F7F4EC] uppercase text-[13px]">{tech.title}</h4>
                   <p className="leading-relaxed opacity-85">{tech.desc}</p>
                 </div>
               ))}
@@ -316,7 +316,7 @@ export default function App() {
             <div className="text-center">
               <button
                 onClick={() => setActiveWorkflow('appraisal')}
-                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
+                className="px-8 py-4 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-sm font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer inline-flex items-center gap-2 shadow-xl"
               >
                 Schedule Appraisal reservation <Calendar className="w-4 h-4" />
               </button>
@@ -333,27 +333,12 @@ export default function App() {
         {currentTab === 'prices' && (
           <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 space-y-8">
             <div className="text-center space-y-2">
-              <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-bold block">1CA Price Desk</span>
+              <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-bold block">1CA Price Desk</span>
               <h2 className="text-2xl font-black text-[#F7F4EC] uppercase">Precious Metals Spot Market</h2>
             </div>
 
             <div className="bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl p-6 space-y-6">
               <GoldPriceChart />
-              
-              <div className="grid grid-cols-3 gap-4 border-t border-[rgba(255,255,255,0.05)] pt-6 text-xs text-center">
-                <div>
-                  <span className="text-[#AEB4C0] uppercase text-[9px] block">24K Spot/g</span>
-                  <p className="text-lg font-bold text-[#F7F4EC]">${DEMO_SPOT_PRICE_GRAM.toFixed(2)} USD</p>
-                </div>
-                <div>
-                  <span className="text-[#AEB4C0] uppercase text-[9px] block">18K Spot/g</span>
-                  <p className="text-lg font-bold text-[#F7F4EC]">${(DEMO_SPOT_PRICE_GRAM * 0.75).toFixed(2)} USD</p>
-                </div>
-                <div>
-                  <span className="text-[#AEB4C0] uppercase text-[9px] block">14K Spot/g</span>
-                  <p className="text-lg font-bold text-[#F7F4EC]">${(DEMO_SPOT_PRICE_GRAM * 0.583).toFixed(2)} USD</p>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -435,10 +420,10 @@ export default function App() {
               )}
             </div>
             <div className="flex-1 space-y-1">
-              <p className="text-[10px] uppercase tracking-widest font-extrabold text-[#AEB4C0]/70">
+              <p className="text-[13px] uppercase tracking-widest font-extrabold text-[#AEB4C0]/70">
                 {notification.type === 'success' ? 'Terminal Success' : notification.type === 'error' ? 'Security Notice' : 'System Information'}
               </p>
-              <p className="text-xs font-medium leading-relaxed text-[#F7F4EC]/90">{notification.message}</p>
+              <p className="text-sm font-medium leading-relaxed text-[#F7F4EC]/90">{notification.message}</p>
             </div>
             <button
               onClick={() => setNotification(null)}

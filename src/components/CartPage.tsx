@@ -26,7 +26,7 @@ export default function CartPage() {
           <ShoppingCart className="w-6 h-6 text-[#C8A45D]" />
         </div>
         <h1 className="text-2xl font-bold text-white">Your cart is empty</h1>
-        <p className="text-sm text-[#9CA3AF]">Add certified gold from the market to continue.</p>
+        <p className="text-base text-[#9CA3AF]">Add certified gold from the market to continue.</p>
         <button
           onClick={() => router.push('/buy')}
           className="inline-flex items-center gap-2 px-6 py-3 bg-[#C8A45D] hover:bg-[#E3C27A] text-black text-sm font-semibold rounded-lg cursor-pointer"
@@ -62,7 +62,7 @@ export default function CartPage() {
               <div className="flex-1 flex flex-col justify-between gap-3">
                 <div className="flex justify-between gap-3">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-[#C8A45D] font-semibold">{item.category}</p>
+                    <p className="text-[13px] uppercase tracking-wider text-[#C8A45D] font-semibold">{item.category}</p>
                     <button
                       onClick={() => router.push(`/buy/${item.slug}`)}
                       className="text-[15px] font-semibold text-white hover:text-[#E3C27A] text-left cursor-pointer"
@@ -129,7 +129,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#2F9D70]/10 border border-[#2F9D70]/20 text-[11px] text-[#2F9D70]">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#2F9D70]/10 border border-[#2F9D70]/20 text-sm text-[#2F9D70]">
               <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
               Full-value insurance included for armored logistics.
             </div>

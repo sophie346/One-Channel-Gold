@@ -29,7 +29,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
       {pageType === 'about' && (
         <div className="space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Our Heritage &amp; Mission</span>
+            <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Our Heritage &amp; Mission</span>
             <h1 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">OneGold Corporate Infrastructure</h1>
             <p className="text-sm text-[#AEB4C0] max-w-2xl mx-auto leading-relaxed">
               Founded in 2018, OneGold bridges physical precious metal commerce with automated cloud resource planning. We secure value through high-precision physics and unyielding compliance.
@@ -48,7 +48,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
             </div>
             
             <div className="p-6 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-4">
-              <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black">Our Structural Standards</h4>
+              <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black">Our Structural Standards</h4>
               <div className="space-y-3 text-xs text-[#F7F4EC]">
                 <div className="flex gap-2.5 items-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#C8A45D]"></div>
@@ -72,7 +72,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
       {pageType === 'security' && (
         <div className="space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Risk Mitigated Custody</span>
+            <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Risk Mitigated Custody</span>
             <h1 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">Security Built Into Every Ledger</h1>
             <p className="text-sm text-[#AEB4C0] max-w-2xl mx-auto leading-relaxed">
               Protecting digital transactions and physical bullion assets is our utmost corporate mandate. Learn how our multi-layered protocols insulate your jewelry and gold.
@@ -97,7 +97,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
               <div key={idx} className="p-5 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-lg space-y-2.5">
                 <ShieldCheck className="w-6 h-6 text-[#C8A45D]" />
                 <h4 className="text-xs font-bold text-[#F7F4EC] uppercase tracking-wider">{card.title}</h4>
-                <p className="text-[11px] text-[#AEB4C0] leading-relaxed">{card.desc}</p>
+                <p className="text-sm text-[#AEB4C0] leading-relaxed">{card.desc}</p>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
       {pageType === 'faq' && (
         <div className="space-y-8">
           <div className="text-center space-y-3 mb-10">
-            <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Frequently Asked Queries</span>
+            <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Frequently Asked Queries</span>
             <h1 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">Market Bulletin FAQ</h1>
           </div>
 
@@ -140,7 +140,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
       {pageType === 'resources' && (
         <div className="space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Technical Guides &amp; Disclosures</span>
+            <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Technical Guides &amp; Disclosures</span>
             <h1 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">OneGold Reference Vault</h1>
           </div>
 
@@ -156,10 +156,10 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
                   <FileText className="w-5 h-5 text-[#C8A45D]" />
                   <div>
                     <p className="text-xs font-bold text-[#F7F4EC]">{res.title}</p>
-                    <p className="text-[10px] text-[#AEB4C0] font-semibold">{res.cat}</p>
+                    <p className="text-[13px] text-[#AEB4C0] font-semibold">{res.cat}</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-[#AEB4C0] uppercase font-bold tracking-wider">Download</span>
+                <span className="text-[13px] bg-white/5 px-2 py-0.5 rounded text-[#AEB4C0] uppercase font-bold tracking-wider">Download</span>
               </div>
             ))}
           </div>
@@ -170,7 +170,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
       {pageType === 'contact' && (
         <div className="space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Corporate Desk Communication</span>
+            <span className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-extrabold block">Corporate Desk Communication</span>
             <h1 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">Get in Touch with our Vault Lobby</h1>
           </div>
 
@@ -194,7 +194,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
               ) : (
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Your full Legal Name</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Your full Legal Name</label>
                     <input
                       type="text"
                       required
@@ -206,7 +206,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Registered Email Address</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Registered Email Address</label>
                     <input
                       type="email"
                       required
@@ -218,7 +218,7 @@ export default function StaticPages({ pageType }: StaticPagesProps) {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Message details</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Message details</label>
                     <textarea
                       required
                       rows={4}

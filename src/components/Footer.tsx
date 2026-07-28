@@ -53,7 +53,7 @@ export default function Footer({ setCurrentTab, onShowNotification }: FooterProp
 
   return (
     <footer className="bg-[#0A0A0A] border-t border-white/[0.06] pt-16 pb-10 text-[#9CA3AF]">
-      <div className="max-w-[1280px] mx-auto px-5 md:px-8">
+      <div className="max-w-[1500px] mx-auto px-5 md:px-8">
         {/* Newsletter */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-14 border-b border-white/[0.06]">
           <div className="space-y-2 max-w-md">

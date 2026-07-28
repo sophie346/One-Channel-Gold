@@ -48,7 +48,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080A0D]/85 backdrop-blur-md">
       <div className="bg-[#171A21] border border-[#C8A45D] w-full max-w-sm rounded-xl overflow-hidden shadow-2xl">
         <div className="p-5 bg-[#11141A] border-b border-white/5 flex justify-between items-center">
-          <h4 className="text-xs font-black text-[#F7F4EC] uppercase tracking-wider">
+          <h4 className="text-sm font-black text-[#F7F4EC] uppercase tracking-wider">
             {mode === 'signin' ? 'Sign In' : 'Create Account'}
           </h4>
           <button
@@ -61,10 +61,10 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
           {mode === 'register' && (
             <div className="space-y-1">
-              <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">
+              <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider font-bold">
                 Full Name
               </label>
               <input
@@ -73,13 +73,13 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
+                className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
               />
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">
+            <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider font-bold">
               Email Address
             </label>
             <input
@@ -88,12 +88,12 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. investor@vault.com"
-              className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
+              className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">
+            <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider font-bold">
               Password
             </label>
             <input
@@ -103,12 +103,12 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimum 6 characters"
-              className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
+              className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none focus:border-[#C8A45D]/50"
             />
           </div>
 
           {error && (
-            <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-[11px] leading-relaxed">
+            <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm leading-relaxed">
               {error}
             </div>
           )}
@@ -122,7 +122,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onSuccess }: Au
             {mode === 'signin' ? 'Sign In' : 'Create Account'}
           </button>
 
-          <div className="text-center text-[10px] text-[#AEB4C0]/70 pt-2 border-t border-[rgba(255,255,255,0.03)]">
+          <div className="text-center text-[13px] text-[#AEB4C0]/70 pt-2 border-t border-[rgba(255,255,255,0.03)]">
             {mode === 'signin' ? (
               <p>
                 No account yet?{' '}

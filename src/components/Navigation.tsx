@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Menu, X, Search, TrendingUp, ShoppingBag } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Menu, X, Search, TrendingUp, TrendingDown, ShoppingBag } from 'lucide-react';
+import { DEMO_SPOT_PRICE_OUNCE } from '../data/mockData';
 
 interface NavigationProps {
   currentTab: string;
@@ -11,6 +12,24 @@ interface NavigationProps {
   logOut: () => void;
   cartCount: number;
   openCart: () => void;
+}
+
+type SpotTicker = {
+  price: number;
+  changePercent: number | null;
+  live: boolean;
+  updatedAt: string;
+};
+
+function formatRelativeAge(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(diffMs) || diffMs < 0) return 'just now';
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins === 1) return '1m ago';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  return hrs === 1 ? '1h ago' : `${hrs}h ago`;
 }
 
 export default function Navigation({
@@ -27,12 +46,54 @@ export default function Navigation({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [spot, setSpot] = useState<SpotTicker>({
+    price: DEMO_SPOT_PRICE_OUNCE,
+    changePercent: null,
+    live: false,
+    updatedAt: new Date().toISOString(),
+  });
+
+  const loadSpot = useCallback(async () => {
+    try {
+      const res = await fetch('/api/gold-price', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (typeof data?.price === 'number' && data.price > 0) {
+        setSpot({
+          price: data.price,
+          changePercent: typeof data.changePercent === 'number' ? data.changePercent : null,
+          live: Boolean(data.live),
+          updatedAt: data.updatedAt || new Date().toISOString(),
+        });
+      }
+    } catch {
+      // keep last known / demo fallback
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    loadSpot();
+    const id = window.setInterval(loadSpot, 60_000);
+    return () => window.clearInterval(id);
+  }, [loadSpot]);
+
+  const change = spot.changePercent;
+  const isUp = change == null || change >= 0;
+  const changeLabel =
+    change == null
+      ? null
+      : `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+  const priceLabel = `$${spot.price.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+  const statusLabel = `${spot.live ? 'LIVE' : 'DEMO'} · Updated ${formatRelativeAge(spot.updatedAt)}`;
 
   const navItems = [
     { label: 'Buy Gold', id: 'buy' },
@@ -57,7 +118,7 @@ export default function Navigation({
             : 'bg-black'
         }`}
       >
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-[68px] flex items-center justify-between gap-4">
+        <div className="max-w-[1500px] mx-auto px-4 md:px-6 h-[68px] flex items-center justify-between gap-4">
           {/* Logo */}
           <button
             onClick={() => handleNavClick('home')}
@@ -90,22 +151,33 @@ export default function Navigation({
 
           {/* Right: price ticker + search + Sign In + CTA */}
           <div className="flex items-center gap-3 md:gap-4 shrink-0">
-            {/* XAU/USD ticker */}
-            <div className="hidden lg:flex flex-col items-end leading-none mr-1">
+            {/* XAU/USD ticker — live spot */}
+            <button
+              type="button"
+              onClick={() => handleNavClick('prices')}
+              className="hidden lg:flex flex-col items-end leading-none mr-1 cursor-pointer hover:opacity-90 transition-opacity"
+              title="View gold prices"
+            >
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#9CA3AF] font-medium">XAU/USD</span>
-                <span className="text-[15px] font-bold text-[#C5A059] tracking-tight">
-                  $3,247.50
+                <span className="text-sm text-[#9CA3AF] font-medium">XAU/USD</span>
+                <span className="text-[15px] font-bold text-[#C5A059] tracking-tight tabular-nums">
+                  {priceLabel}
                 </span>
-                <span className="inline-flex items-center gap-0.5 text-[12px] font-semibold text-[#4ADE80]">
-                  <TrendingUp className="w-3 h-3" />
-                  +0.38%
-                </span>
+                {changeLabel && (
+                  <span
+                    className={`inline-flex items-center gap-0.5 text-[12px] font-semibold ${
+                      isUp ? 'text-[#4ADE80]' : 'text-red-400'
+                    }`}
+                  >
+                    {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {changeLabel}
+                  </span>
+                )}
               </div>
-              <span className="text-[9px] text-[#6B7280] mt-1 tracking-wide">
-                DEMO · Updated 2m ago
+              <span className="text-[13px] text-[#6B7280] mt-1 tracking-wide">
+                {statusLabel}
               </span>
-            </div>
+            </button>
 
             {/* Search */}
             <button
@@ -201,15 +273,21 @@ export default function Navigation({
           <div className="mb-5 p-4 bg-[#111] rounded-xl border border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] text-[#9CA3AF]">XAU/USD</p>
-                <p className="text-[18px] font-bold text-[#C5A059]">$3,247.50</p>
+                <p className="text-sm text-[#9CA3AF]">XAU/USD</p>
+                <p className="text-[18px] font-bold text-[#C5A059] tabular-nums">{priceLabel}</p>
               </div>
-              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#4ADE80]">
-                <TrendingUp className="w-3.5 h-3.5" />
-                +0.38%
-              </span>
+              {changeLabel && (
+                <span
+                  className={`inline-flex items-center gap-1 text-[13px] font-semibold ${
+                    isUp ? 'text-[#4ADE80]' : 'text-red-400'
+                  }`}
+                >
+                  {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                  {changeLabel}
+                </span>
+              )}
             </div>
-            <p className="text-[10px] text-[#6B7280] mt-1">DEMO · Updated 2m ago</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">{statusLabel}</p>
           </div>
 
           <nav className="flex flex-col gap-1 mb-6">

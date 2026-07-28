@@ -102,7 +102,7 @@ export default function PortalDashboard({
             </div>
             <div>
               <h4 className="text-sm font-bold text-[#F7F4EC]">{userSession.name}</h4>
-              <p className="text-[10px] text-[#2F9D70] font-bold uppercase flex items-center gap-1 mt-0.5">
+              <p className="text-[13px] text-[#2F9D70] font-bold uppercase flex items-center gap-1 mt-0.5">
                 <UserCheck className="w-3 h-3" /> AML Verified
               </p>
             </div>
@@ -126,7 +126,7 @@ export default function PortalDashboard({
                     <span>{item.label}</span>
                   </div>
                   {item.badge && (
-                    <span className="bg-[#C85A5A] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                    <span className="bg-[#C85A5A] text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
                       {item.badge}
                     </span>
                   )}
@@ -145,9 +145,9 @@ export default function PortalDashboard({
               <div className="flex justify-between items-center pb-4 border-b border-[rgba(255,255,255,0.06)]">
                 <div>
                   <h3 className="text-base font-bold text-[#F7F4EC] uppercase">Unified Account Overview</h3>
-                  <p className="text-[10px] text-[#AEB4C0]">Real-time summaries synced with OneChannelAdmin</p>
+                  <p className="text-[13px] text-[#AEB4C0]">Real-time summaries synced with OneChannelAdmin</p>
                 </div>
-                <span className="text-[10px] uppercase font-bold tracking-wider bg-white/5 px-2.5 py-1 rounded text-[#AEB4C0]">
+                <span className="text-[13px] uppercase font-bold tracking-wider bg-white/5 px-2.5 py-1 rounded text-[#AEB4C0]">
                   Client ID: 1CA-US-90114
                 </span>
               </div>
@@ -155,19 +155,19 @@ export default function PortalDashboard({
               {/* KPI cards grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-[#11141A] p-4 rounded border border-white/5 space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0] font-bold block">Pawn Collateral Pledged</span>
+                  <span className="text-xs uppercase tracking-wider text-[#AEB4C0] font-bold block">Pawn Collateral Pledged</span>
                   <p className="text-lg font-black text-[#F7F4EC]">${pawnLoans.reduce((acc, l) => l.status === 'Active' ? acc + l.collateralValue : acc, 0).toLocaleString()}</p>
                 </div>
                 <div className="bg-[#11141A] p-4 rounded border border-white/5 space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0] font-bold block">Secure Custody Storage</span>
+                  <span className="text-xs uppercase tracking-wider text-[#AEB4C0] font-bold block">Secure Custody Storage</span>
                   <p className="text-lg font-black text-[#F7F4EC]">${storageItems.reduce((acc, l) => acc + l.insuranceValue, 0).toLocaleString()}</p>
                 </div>
                 <div className="bg-[#11141A] p-4 rounded border border-white/5 space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0] font-bold block">Active Gold Quotes</span>
+                  <span className="text-xs uppercase tracking-wider text-[#AEB4C0] font-bold block">Active Gold Quotes</span>
                   <p className="text-lg font-black text-[#E3C27A]">{goldSales.length + localGoldSales.length} Active</p>
                 </div>
                 <div className="bg-[#11141A] p-4 rounded border border-white/5 space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0] font-bold block">Placed bids value</span>
+                  <span className="text-xs uppercase tracking-wider text-[#AEB4C0] font-bold block">Placed bids value</span>
                   <p className="text-lg font-black text-[#F7F4EC]">${Object.values(bidsPlaced).reduce((acc, v) => acc + v, 0).toLocaleString()}</p>
                 </div>
               </div>
@@ -177,18 +177,18 @@ export default function PortalDashboard({
                 
                 {/* Active pawn loan teaser */}
                 <div className="p-4 bg-[#11141A] rounded-lg border border-white/5 space-y-3">
-                  <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-wider font-bold">Active Pawn Loans Collateral</h4>
+                  <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-wider font-bold">Active Pawn Loans Collateral</h4>
                   {pawnLoans.filter(l => l.status === 'Active').length > 0 ? (
                     pawnLoans.filter(l => l.status === 'Active').map((loan) => (
                       <div key={loan.id} className="text-xs space-y-1.5">
                         <p className="font-bold text-[#F7F4EC]">{loan.itemName}</p>
-                        <div className="flex justify-between text-[11px] text-[#AEB4C0]">
+                        <div className="flex justify-between text-sm text-[#AEB4C0]">
                           <span>Repayment Liability:</span>
                           <span className="font-bold text-[#E3C27A]">${loan.redemptionAmount.toLocaleString()}</span>
                         </div>
                         <button
                           onClick={() => triggerRepayment(loan)}
-                          className="w-full mt-2.5 py-1.5 bg-[#C8A45D] text-[#080A0D] text-[10px] uppercase tracking-wider font-bold rounded cursor-pointer"
+                          className="w-full mt-2.5 py-1.5 bg-[#C8A45D] text-[#080A0D] text-[13px] uppercase tracking-wider font-bold rounded cursor-pointer"
                         >
                           Trigger Collateral Redemption
                         </button>
@@ -201,7 +201,7 @@ export default function PortalDashboard({
 
                 {/* Docs require signature */}
                 <div className="p-4 bg-[#11141A] rounded-lg border border-white/5 space-y-3">
-                  <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-wider font-bold">Required Signatures</h4>
+                  <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-wider font-bold">Required Signatures</h4>
                   <div className="space-y-2">
                     {INITIAL_DOCUMENTS.map((doc) => {
                       const isSigned = signedDocs[doc.id] || doc.signed;
@@ -209,14 +209,14 @@ export default function PortalDashboard({
                         <div key={doc.id} className="text-xs flex justify-between items-center py-1 border-b border-white/5 last:border-0 pb-2">
                           <div>
                             <p className="font-bold text-[#F7F4EC] line-clamp-1">{doc.title}</p>
-                            <span className="text-[9px] text-[#AEB4C0]/60">{doc.category}</span>
+                            <span className="text-xs text-[#AEB4C0]/60">{doc.category}</span>
                           </div>
                           {isSigned ? (
-                            <span className="text-[10px] text-[#2F9D70] font-bold">Signed</span>
+                            <span className="text-[13px] text-[#2F9D70] font-bold">Signed</span>
                           ) : (
                             <button
                               onClick={() => signDocument(doc.id)}
-                              className="px-2.5 py-1 bg-[#C8A45D]/10 hover:bg-[#C8A45D] hover:text-[#080A0D] rounded text-[10px] uppercase font-bold text-[#E3C27A] transition-all cursor-pointer"
+                              className="px-2.5 py-1 bg-[#C8A45D]/10 hover:bg-[#C8A45D] hover:text-[#080A0D] rounded text-[13px] uppercase font-bold text-[#E3C27A] transition-all cursor-pointer"
                             >
                               Sign
                             </button>
@@ -243,12 +243,12 @@ export default function PortalDashboard({
                         <img src={item.image} alt="product" referrerPolicy="no-referrer" className="w-10 h-10 object-cover rounded" />
                         <div>
                           <p className="font-bold text-[#F7F4EC]">{item.name}</p>
-                          <span className="text-[10px] text-[#AEB4C0]/60">Mass: {item.weight}g • Purity: {item.karat}</span>
+                          <span className="text-[13px] text-[#AEB4C0]/60">Mass: {item.weight}g • Purity: {item.karat}</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-black text-[#E3C27A]">${item.price.toLocaleString()}</p>
-                        <span className="text-[9px] uppercase bg-[#2F9D70]/10 text-[#2F9D70] font-bold px-1.5 py-0.5 rounded mt-1 inline-block">
+                        <span className="text-xs uppercase bg-[#2F9D70]/10 text-[#2F9D70] font-bold px-1.5 py-0.5 rounded mt-1 inline-block">
                           Insured Transit
                         </span>
                       </div>
@@ -270,12 +270,12 @@ export default function PortalDashboard({
                   <div key={idx} className="p-4 bg-[#11141A] border border-white/5 rounded-lg flex justify-between items-center text-xs">
                     <div>
                       <p className="font-bold text-[#F7F4EC]">{sale.itemType}</p>
-                      <p className="text-[10px] text-[#AEB4C0]/70 mt-1">Stated: {sale.statedKarat} • Est Weight: {sale.estimatedWeight}g • Intake Method: {sale.method}</p>
-                      {sale.trackingNumber && <p className="text-[9px] font-mono text-[#E3C27A] mt-1">Tracking ID: {sale.trackingNumber}</p>}
+                      <p className="text-[13px] text-[#AEB4C0]/70 mt-1">Stated: {sale.statedKarat} • Est Weight: {sale.estimatedWeight}g • Intake Method: {sale.method}</p>
+                      {sale.trackingNumber && <p className="text-xs font-mono text-[#E3C27A] mt-1">Tracking ID: {sale.trackingNumber}</p>}
                     </div>
                     <div className="text-right">
                       <p className="font-black text-[#E3C27A]">${sale.estimatedRangeMin.toLocaleString()} – ${sale.estimatedRangeMax.toLocaleString()}</p>
-                      <span className="text-[9px] uppercase bg-white/5 text-[#C8A45D] font-bold px-1.5 py-0.5 rounded mt-1 inline-block">
+                      <span className="text-xs uppercase bg-white/5 text-[#C8A45D] font-bold px-1.5 py-0.5 rounded mt-1 inline-block">
                         {sale.status}
                       </span>
                     </div>
@@ -302,19 +302,19 @@ export default function PortalDashboard({
                         </span>
                       </div>
                       <p className="font-bold text-[#F7F4EC]">{loan.itemName}</p>
-                      <p className="text-[10px] text-[#AEB4C0]/70">Pledge Date: {loan.dateIssued} • Principal: ${loan.principal.toLocaleString()} • APR: {loan.apr}%</p>
+                      <p className="text-[13px] text-[#AEB4C0]/70">Pledge Date: {loan.dateIssued} • Principal: ${loan.principal.toLocaleString()} • APR: {loan.apr}%</p>
                     </div>
                     
                     <div className="text-right w-full sm:w-auto flex justify-between sm:flex-col items-baseline sm:items-end gap-2">
                       {loan.status === 'Active' || loan.status === 'In Grace Period' ? (
                         <>
                           <div>
-                            <span className="text-[9px] text-[#AEB4C0] uppercase block">Redemption Amount</span>
+                            <span className="text-xs text-[#AEB4C0] uppercase block">Redemption Amount</span>
                             <p className="font-black text-[#E3C27A] text-lg">${loan.redemptionAmount.toLocaleString()}</p>
                           </div>
                           <button
                             onClick={() => triggerRepayment(loan)}
-                            className="px-3 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] rounded font-bold uppercase text-[10px] tracking-wider cursor-pointer"
+                            className="px-3 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] rounded font-bold uppercase text-[13px] tracking-wider cursor-pointer"
                           >
                             Redeem
                           </button>
@@ -338,16 +338,16 @@ export default function PortalDashboard({
                   {watchlist.map((id) => (
                     <div key={id} className="p-3 bg-[#11141A] border border-white/5 rounded-lg flex justify-between items-center text-xs">
                       <div>
-                        <span className="text-[9px] text-[#C8A45D] uppercase block">Watching lot</span>
+                        <span className="text-xs text-[#C8A45D] uppercase block">Watching lot</span>
                         <p className="font-bold text-[#F7F4EC]">{id}</p>
                       </div>
-                      <span className="text-[10px] uppercase bg-white/5 px-2 py-0.5 rounded text-[#AEB4C0]">In Progress</span>
+                      <span className="text-[13px] uppercase bg-white/5 px-2 py-0.5 rounded text-[#AEB4C0]">In Progress</span>
                     </div>
                   ))}
                   {Object.keys(bidsPlaced).map((id) => (
                     <div key={id} className="p-3 bg-[#11141A] border border-[#2F9D70]/40 rounded-lg flex justify-between items-center text-xs">
                       <div>
-                        <span className="text-[9px] text-[#2F9D70] uppercase font-bold block">Bid Active</span>
+                        <span className="text-xs text-[#2F9D70] uppercase font-bold block">Bid Active</span>
                         <p className="font-bold text-[#F7F4EC]">{id}</p>
                       </div>
                       <p className="font-black text-[#E3C27A]">${bidsPlaced[id].toLocaleString()}</p>
@@ -370,11 +370,11 @@ export default function PortalDashboard({
                     <div key={idx} className="p-4 bg-[#11141A] border border-white/5 rounded-lg flex justify-between items-center text-xs">
                       <div>
                         <p className="font-bold text-[#F7F4EC]">{b.itemName || 'Assay Testing Target'}</p>
-                        <p className="text-[10px] text-[#AEB4C0]/70 mt-1">Laboratory: {b.location} • Type: {b.appraisalService}</p>
+                        <p className="text-[13px] text-[#AEB4C0]/70 mt-1">Laboratory: {b.location} • Type: {b.appraisalService}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[#C8A45D]">{b.bookingDate}</p>
-                        <p className="text-[10px] text-[#AEB4C0]/50">{b.bookingTime}</p>
+                        <p className="text-[13px] text-[#AEB4C0]/50">{b.bookingTime}</p>
                       </div>
                     </div>
                   ))}
@@ -397,12 +397,12 @@ export default function PortalDashboard({
                         <span className="font-mono font-bold text-[#E3C27A]">{order.id}</span>
                         <h4 className="font-bold text-[#F7F4EC] mt-0.5">{order.itemName}</h4>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider bg-[#C8A45D]/10 text-[#C8A45D] font-bold px-2 py-0.5 rounded">
+                      <span className="text-[13px] uppercase tracking-wider bg-[#C8A45D]/10 text-[#C8A45D] font-bold px-2 py-0.5 rounded">
                         {order.status}
                       </span>
                     </div>
                     
-                    <p className="text-[10px] text-[#AEB4C0]">{order.notes}</p>
+                    <p className="text-[13px] text-[#AEB4C0]">{order.notes}</p>
                   </div>
                 ))}
               </div>
@@ -419,11 +419,11 @@ export default function PortalDashboard({
                     <div>
                       <p className="font-mono font-bold text-[#E3C27A]">{item.id}</p>
                       <p className="font-bold text-[#F7F4EC] mt-0.5">{item.itemName}</p>
-                      <p className="text-[10px] text-[#AEB4C0]/60">Vault: {item.vaultLocation} • Bin: {item.binNumber}</p>
+                      <p className="text-[13px] text-[#AEB4C0]/60">Vault: {item.vaultLocation} • Bin: {item.binNumber}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-black text-[#F7F4EC]">${item.insuranceValue.toLocaleString()}</p>
-                      <span className="text-[9px] uppercase tracking-wider text-[#2F9D70] font-bold mt-1 inline-block">
+                      <span className="text-xs uppercase tracking-wider text-[#2F9D70] font-bold mt-1 inline-block">
                         100% INSURED
                       </span>
                     </div>
@@ -446,13 +446,13 @@ export default function PortalDashboard({
                   <div key={idx} className="p-3 bg-[#11141A] border border-white/5 rounded-lg flex justify-between items-center text-xs">
                     <div>
                       <p className="font-semibold text-[#F7F4EC]">{p.desc}</p>
-                      <p className="text-[9px] text-[#AEB4C0]/50 mt-0.5">{p.date}</p>
+                      <p className="text-xs text-[#AEB4C0]/50 mt-0.5">{p.date}</p>
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${p.amount > 0 ? 'text-[#2F9D70]' : 'text-[#AEB4C0]'}`}>
                         {p.amount > 0 ? `+$${p.amount.toLocaleString()}` : `-$${Math.abs(p.amount).toLocaleString()}`}
                       </p>
-                      <span className="text-[9px] text-[#AEB4C0]/60 uppercase font-semibold">{p.status}</span>
+                      <span className="text-xs text-[#AEB4C0]/60 uppercase font-semibold">{p.status}</span>
                     </div>
                   </div>
                 ))}
@@ -473,7 +473,7 @@ export default function PortalDashboard({
                         <FileText className="w-5 h-5 text-[#C8A45D]" />
                         <div>
                           <p className="font-bold text-[#F7F4EC]">{doc.title}</p>
-                          <span className="text-[10px] text-[#AEB4C0]/60">{doc.category} • {doc.date}</span>
+                          <span className="text-[13px] text-[#AEB4C0]/60">{doc.category} • {doc.date}</span>
                         </div>
                       </div>
                       
@@ -482,7 +482,7 @@ export default function PortalDashboard({
                       ) : (
                         <button
                           onClick={() => signDocument(doc.id)}
-                          className="px-3.5 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] rounded font-bold uppercase tracking-wider text-[10px] cursor-pointer"
+                          className="px-3.5 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] rounded font-bold uppercase tracking-wider text-[13px] cursor-pointer"
                         >
                           Sign PDF
                         </button>
@@ -507,9 +507,9 @@ export default function PortalDashboard({
                   <div key={idx} className={`p-4 rounded-lg border text-xs space-y-1 ${n.alert ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'}`}>
                     <div className="flex justify-between items-center">
                       <h4 className="font-bold text-[#F7F4EC]">{n.title}</h4>
-                      <span className="text-[9px] text-[#AEB4C0]/60 font-semibold">{n.date}</span>
+                      <span className="text-xs text-[#AEB4C0]/60 font-semibold">{n.date}</span>
                     </div>
-                    <p className="text-[10px] text-[#AEB4C0] leading-relaxed">{n.text}</p>
+                    <p className="text-[13px] text-[#AEB4C0] leading-relaxed">{n.text}</p>
                   </div>
                 ))}
               </div>
@@ -523,22 +523,22 @@ export default function PortalDashboard({
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider font-bold">Primary Owner Name</span>
+                  <span className="text-xs uppercase tracking-wider font-bold">Primary Owner Name</span>
                   <p className="p-2.5 bg-[#11141A] rounded border border-white/5 font-bold text-[#F7F4EC]">{userSession.name}</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] uppercase tracking-wider font-bold font-bold">Registered Email ID</span>
+                  <span className="text-xs uppercase tracking-wider font-bold font-bold">Registered Email ID</span>
                   <p className="p-2.5 bg-[#11141A] rounded border border-white/5 font-bold text-[#F7F4EC]">{userSession.email}</p>
                 </div>
               </div>
 
               <div className="p-4 bg-white/5 rounded border border-white/5 space-y-3">
-                <h4 className="font-bold text-[#F7F4EC] uppercase text-[10px]">Security Compliance &amp; 2FA Status</h4>
+                <h4 className="font-bold text-[#F7F4EC] uppercase text-[13px]">Security Compliance &amp; 2FA Status</h4>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#2F9D70]"></span>
                   <span className="font-semibold text-[#F7F4EC]">Multi-Factor Authentication Active (1CA Auth)</span>
                 </div>
-                <p className="text-[10px] leading-relaxed">
+                <p className="text-[13px] leading-relaxed">
                   Your identity documents are securely locked in cold storage inside 1CA folder partitions. Any transaction over $5,000 mandates automated biometrics or SMS hardware token verification.
                 </p>
               </div>
@@ -555,7 +555,7 @@ export default function PortalDashboard({
             <div className="p-5 bg-[#11141A] border-b border-white/5 flex justify-between items-center">
               <div>
                 <h4 className="text-sm font-black text-[#F7F4EC] uppercase">Repay Pawn Loan Collateral</h4>
-                <p className="text-[10px] text-[#C8A45D] font-mono">{paymentTargetLoan.id}</p>
+                <p className="text-[13px] text-[#C8A45D] font-mono">{paymentTargetLoan.id}</p>
               </div>
               <button onClick={() => setPaymentModalOpen(false)} className="p-1.5 hover:bg-white/5 rounded-full text-[#AEB4C0]"><X className="w-5 h-5" /></button>
             </div>
@@ -576,7 +576,7 @@ export default function PortalDashboard({
                 </div>
               </div>
 
-              <div className="p-3 bg-white/5 rounded border border-white/5 leading-relaxed text-[10px]">
+              <div className="p-3 bg-white/5 rounded border border-white/5 leading-relaxed text-[13px]">
                 By clicking confirm, the dues will be debited from your registered cash account and the physical asset (<strong>{paymentTargetLoan.itemName}</strong>) will be scheduled for safe dispatch or secure lobby retrieval.
               </div>
             </div>

@@ -67,7 +67,7 @@ export default function ServicesView() {
       
       {/* Intro Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
-        <span className="text-[11px] uppercase tracking-widest text-[#C8A45D] font-black bg-[#C8A45D]/10 px-3 py-1 rounded">
+        <span className="text-sm uppercase tracking-widest text-[#C8A45D] font-black bg-[#C8A45D]/10 px-3 py-1 rounded">
           OneChannelAdmin Service Center
         </span>
         <h2 className="text-3xl md:text-4xl font-black text-[#F7F4EC] tracking-tight">
@@ -86,7 +86,7 @@ export default function ServicesView() {
               <span className="w-2 h-2 rounded-full bg-[#C8A45D] animate-pulse"></span>
               Live Work Order Tracker (1CA Integration)
             </h3>
-            <p className="text-[10px] uppercase tracking-wider text-[#AEB4C0]/60 mt-1">Enter your 1CA receipt ID to inspect physical progress and technician logs</p>
+            <p className="text-[13px] uppercase tracking-wider text-[#AEB4C0]/60 mt-1">Enter your 1CA receipt ID to inspect physical progress and technician logs</p>
           </div>
 
           {/* Input field */}
@@ -105,19 +105,19 @@ export default function ServicesView() {
           <div className="bg-[#080A0D] border border-white/10 rounded-sm p-5 space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b border-[rgba(255,255,255,0.06)] text-xs">
               <div>
-                <p className="text-[10px] text-[#AEB4C0] uppercase">Target Asset</p>
+                <p className="text-[13px] text-[#AEB4C0] uppercase">Target Asset</p>
                 <p className="font-bold text-[#F7F4EC]">{foundOrder.itemName}</p>
               </div>
               <div>
-                <p className="text-[10px] text-[#AEB4C0] uppercase">Service Type</p>
+                <p className="text-[13px] text-[#AEB4C0] uppercase">Service Type</p>
                 <p className="font-bold text-[#C8A45D]">{foundOrder.serviceType}</p>
               </div>
               <div>
-                <p className="text-[10px] text-[#AEB4C0] uppercase">Order Total</p>
+                <p className="text-[13px] text-[#AEB4C0] uppercase">Order Total</p>
                 <p className="font-bold text-[#F7F4EC]">${foundOrder.cost.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-[10px] text-[#AEB4C0] uppercase">Est Completion</p>
+                <p className="text-[13px] text-[#AEB4C0] uppercase">Est Completion</p>
                 <p className="font-bold text-[#E3C27A]">{foundOrder.estimatedCompletion}</p>
               </div>
             </div>
@@ -146,8 +146,8 @@ export default function ServicesView() {
                         <p className={`text-xs font-bold ${isActive ? 'text-[#E3C27A]' : isCompleted ? 'text-[#2F9D70]' : 'text-[#AEB4C0]'}`}>
                           {step.status}
                         </p>
-                        <p className="text-[9px] text-[#AEB4C0]/50 font-semibold">{step.date}</p>
-                        <p className="text-[10px] text-[#AEB4C0] leading-normal md:max-w-[140px] md:mx-auto">{step.description}</p>
+                        <p className="text-xs text-[#AEB4C0]/50 font-semibold">{step.date}</p>
+                        <p className="text-[13px] text-[#AEB4C0] leading-normal md:max-w-[140px] md:mx-auto">{step.description}</p>
                       </div>
                     </div>
                   );
@@ -181,7 +181,7 @@ export default function ServicesView() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest">Polishing &amp; Buffing</p>
-              <p className="text-[10px] text-[#AEB4C0]/60 mt-0.5">Restore metallic glow and clarity</p>
+              <p className="text-[13px] text-[#AEB4C0]/60 mt-0.5">Restore metallic glow and clarity</p>
             </div>
           </button>
 
@@ -198,7 +198,7 @@ export default function ServicesView() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest">Prong &amp; Shank Repair</p>
-              <p className="text-[10px] text-[#AEB4C0]/60 mt-0.5">Micro-laser joint re-tipping</p>
+              <p className="text-[13px] text-[#AEB4C0]/60 mt-0.5">Micro-laser joint re-tipping</p>
             </div>
           </button>
 
@@ -215,7 +215,7 @@ export default function ServicesView() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest">Custom Jewelry Design</p>
-              <p className="text-[10px] text-[#AEB4C0]/60 mt-0.5">Bespoke 3D CAD modeling</p>
+              <p className="text-[13px] text-[#AEB4C0]/60 mt-0.5">Bespoke 3D CAD modeling</p>
             </div>
           </button>
         </div>
@@ -227,17 +227,17 @@ export default function ServicesView() {
               <h3 className="text-lg font-black text-[#F7F4EC] tracking-tight">{currentService.title}</h3>
               <p className="text-xs text-[#AEB4C0] leading-relaxed">{currentService.desc}</p>
               
-              <div className="grid grid-cols-3 gap-3 border-t border-[rgba(255,255,255,0.06)] pt-4 text-[10px] text-[#AEB4C0]">
+              <div className="grid grid-cols-3 gap-3 border-t border-[rgba(255,255,255,0.06)] pt-4 text-[13px] text-[#AEB4C0]">
                 <div>
-                  <span className="block font-semibold uppercase text-[9px]">Starting Price</span>
+                  <span className="block font-semibold uppercase text-xs">Starting Price</span>
                   <span className="text-xs font-bold text-[#E3C27A]">{currentService.price}</span>
                 </div>
                 <div>
-                  <span className="block font-semibold uppercase text-[9px]">Standard Period</span>
+                  <span className="block font-semibold uppercase text-xs">Standard Period</span>
                   <span className="text-xs font-bold text-[#F7F4EC]">{currentService.time}</span>
                 </div>
                 <div>
-                  <span className="block font-semibold uppercase text-[9px]">Insured Warranty</span>
+                  <span className="block font-semibold uppercase text-xs">Insured Warranty</span>
                   <span className="text-xs font-bold text-[#2F9D70]">{currentService.warranty}</span>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function ServicesView() {
 
             {/* Micro visual comparison - Slide card style */}
             <div className="space-y-2">
-              <label className="text-[9px] text-[#AEB4C0] uppercase tracking-wider font-bold">Technician Optical View (Before vs After)</label>
+              <label className="text-xs text-[#AEB4C0] uppercase tracking-wider font-bold">Technician Optical View (Before vs After)</label>
               <div className="grid grid-cols-2 gap-2 aspect-[4/3] rounded overflow-hidden">
                 <div className="relative group overflow-hidden bg-[#080A0D] border border-white/5">
                   <img src={currentService.before} alt="Before" referrerPolicy="no-referrer" className="w-full h-full object-cover opacity-60" />
@@ -261,7 +261,7 @@ export default function ServicesView() {
 
           {/* Workflow list */}
           <div className="border-t border-[rgba(255,255,255,0.06)] pt-6 space-y-3">
-            <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black">Centralized Intake Checklist Workflow</h4>
+            <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black">Centralized Intake Checklist Workflow</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {currentService.steps.map((step, idx) => (
                 <div key={idx} className="flex gap-2.5 items-start text-xs text-[#AEB4C0]">

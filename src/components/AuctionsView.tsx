@@ -197,14 +197,14 @@ export default function AuctionsView({
 
               {/* Bidding logs ledger */}
               <div className="bg-[#11141A] border border-[rgba(255,255,255,0.04)] rounded-lg p-5">
-                <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black mb-4">1CA Live Bid Log history</h4>
+                <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black mb-4">1CA Live Bid Log history</h4>
                 <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-2">
                   {selectedLot.bidsHistory.map((bid, i) => (
                     <div key={i} className="flex justify-between items-center text-xs py-2 border-b border-[rgba(255,255,255,0.03)] last:border-0">
                       <span className="font-semibold text-[#F7F4EC]">{bid.bidder}</span>
                       <div className="text-right">
                         <p className="font-bold text-[#E3C27A]">${bid.amount.toLocaleString()}</p>
-                        <p className="text-[9px] text-[#AEB4C0]/60">Assay Log Verified</p>
+                        <p className="text-xs text-[#AEB4C0]/60">Assay Log Verified</p>
                       </div>
                     </div>
                   ))}
@@ -216,11 +216,11 @@ export default function AuctionsView({
             <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] tracking-widest text-[#C8A45D] uppercase font-bold">{selectedLot.lotNumber}</span>
+                  <span className="text-[13px] tracking-widest text-[#C8A45D] uppercase font-bold">{selectedLot.lotNumber}</span>
                   <span className="text-white/20">•</span>
-                  <span className="text-[10px] uppercase tracking-wider bg-white/5 text-[#AEB4C0] px-2 py-0.5 rounded font-semibold">{selectedLot.category}</span>
+                  <span className="text-[13px] uppercase tracking-wider bg-white/5 text-[#AEB4C0] px-2 py-0.5 rounded font-semibold">{selectedLot.category}</span>
                   <span className="text-white/20">•</span>
-                  <span className="text-[10px] uppercase text-[#AEB4C0] font-semibold">{selectedLot.appraisalStatus} Appraisal</span>
+                  <span className="text-[13px] uppercase text-[#AEB4C0] font-semibold">{selectedLot.appraisalStatus} Appraisal</span>
                 </div>
 
                 <h1 className="text-2xl md:text-3xl font-black text-[#F7F4EC] tracking-tight">{selectedLot.title}</h1>
@@ -229,11 +229,11 @@ export default function AuctionsView({
                 {/* Specs */}
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="bg-[#11141A] p-3 rounded border border-white/5 text-center">
-                    <span className="text-[9px] text-[#AEB4C0] uppercase tracking-wider block">Tested Karatage</span>
+                    <span className="text-xs text-[#AEB4C0] uppercase tracking-wider block">Tested Karatage</span>
                     <span className="text-sm font-bold text-[#F7F4EC]">{selectedLot.karat} pure</span>
                   </div>
                   <div className="bg-[#11141A] p-3 rounded border border-white/5 text-center">
-                    <span className="text-[9px] text-[#AEB4C0] uppercase tracking-wider block">Total Mass (Gross)</span>
+                    <span className="text-xs text-[#AEB4C0] uppercase tracking-wider block">Total Mass (Gross)</span>
                     <span className="text-sm font-bold text-[#F7F4EC]">{selectedLot.weight} grams</span>
                   </div>
                 </div>
@@ -243,14 +243,14 @@ export default function AuctionsView({
               <div className="p-5 bg-[#11141A] rounded-lg border border-[rgba(255,255,255,0.06)] space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-[10px] text-[#AEB4C0] uppercase">Current High Bid</span>
+                    <span className="text-[13px] text-[#AEB4C0] uppercase">Current High Bid</span>
                     <p className="text-3xl font-black text-[#E3C27A] mt-1">${selectedLot.currentBid.toLocaleString()}</p>
-                    <p className="text-[9px] text-[#2F9D70] font-bold mt-1">Reserve Status: {selectedLot.reserveStatus}</p>
+                    <p className="text-xs text-[#2F9D70] font-bold mt-1">Reserve Status: {selectedLot.reserveStatus}</p>
                   </div>
                   <div className="text-right border-l border-[rgba(255,255,255,0.06)] pl-4">
-                    <span className="text-[10px] text-[#AEB4C0] uppercase">Total Bids Placed</span>
+                    <span className="text-[13px] text-[#AEB4C0] uppercase">Total Bids Placed</span>
                     <p className="text-2xl font-black text-[#F7F4EC] mt-1">{selectedLot.bidsCount}</p>
-                    <p className="text-[9px] text-[#AEB4C0] mt-1">Starting Bid: ${selectedLot.startingBid.toLocaleString()}</p>
+                    <p className="text-xs text-[#AEB4C0] mt-1">Starting Bid: ${selectedLot.startingBid.toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -277,7 +277,7 @@ export default function AuctionsView({
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
             <div>
-              <span className="text-[10px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">OneGold Live Bidding</span>
+              <span className="text-[13px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">OneGold Live Bidding</span>
               <h2 className="text-3xl font-black text-[#F7F4EC] tracking-tight">Bid on Verified Gold and Jewelry</h2>
             </div>
 
@@ -315,16 +315,16 @@ export default function AuctionsView({
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute top-2 left-2 flex flex-col gap-1.5">
-                      <span className="text-[9px] uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
+                      <span className="text-xs uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
                         Lot {lot.lotNumber.split('#')[1]}
                       </span>
                     </div>
 
-                    <div className="absolute bottom-2 left-2 right-2 bg-[#080A0D]/85 backdrop-blur-sm p-1.5 rounded border border-white/5 flex justify-between items-center text-[10px]">
+                    <div className="absolute bottom-2 left-2 right-2 bg-[#080A0D]/85 backdrop-blur-sm p-1.5 rounded border border-white/5 flex justify-between items-center text-[13px]">
                       <span className="flex items-center gap-1 text-[#AEB4C0]">
                         <Clock className="w-3 h-3 text-[#C8A45D]" /> {timeRemaining[lot.id] || 'Loading'}
                       </span>
-                      <span className="font-bold text-[#E3C27A] uppercase text-[9px] bg-[#C8A45D]/10 px-1.5 py-0.5 rounded">
+                      <span className="font-bold text-[#E3C27A] uppercase text-xs bg-[#C8A45D]/10 px-1.5 py-0.5 rounded">
                         {lot.reserveStatus === 'Met' ? 'Reserve Met' : 'Reserve Active'}
                       </span>
                     </div>
@@ -340,7 +340,7 @@ export default function AuctionsView({
                   {/* text bodies */}
                   <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[9px] text-[#AEB4C0] font-semibold">
+                      <div className="flex justify-between items-center text-xs text-[#AEB4C0] font-semibold">
                         <span>{lot.karat} Gold • {lot.weight}g</span>
                         <span className="uppercase text-[#2F9D70]">{lot.appraisalStatus}</span>
                       </div>
@@ -350,18 +350,18 @@ export default function AuctionsView({
                       >
                         {lot.title}
                       </h3>
-                      <p className="text-[10px] text-[#AEB4C0]/70 line-clamp-2 leading-relaxed">{lot.description}</p>
+                      <p className="text-[13px] text-[#AEB4C0]/70 line-clamp-2 leading-relaxed">{lot.description}</p>
                     </div>
 
                     <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] flex justify-between items-center">
                       <div>
-                        <span className="text-[9px] text-[#AEB4C0] uppercase">High bid ({lot.bidsCount})</span>
+                        <span className="text-xs text-[#AEB4C0] uppercase">High bid ({lot.bidsCount})</span>
                         <p className="text-base font-black text-[#E3C27A]">${lot.currentBid.toLocaleString()}</p>
                       </div>
 
                       <button
                         onClick={() => openBidModal(lot.id)}
-                        className="px-3.5 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-[10px] font-extrabold uppercase tracking-widest rounded transition-all cursor-pointer flex items-center gap-1"
+                        className="px-3.5 py-1.5 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] text-[13px] font-extrabold uppercase tracking-widest rounded transition-all cursor-pointer flex items-center gap-1"
                       >
                         <Gavel className="w-3 h-3" /> Bid
                       </button>
@@ -383,7 +383,7 @@ export default function AuctionsView({
             <div className="p-5 bg-[#11141A] border-b border-[rgba(255,255,255,0.06)] flex justify-between items-center">
               <div>
                 <h3 className="text-sm font-bold text-[#F7F4EC] uppercase tracking-wider">Confirm Digital Auction Bid</h3>
-                <p className="text-[10px] text-[#C8A45D] font-mono">{targetLot.lotNumber}</p>
+                <p className="text-[13px] text-[#C8A45D] font-mono">{targetLot.lotNumber}</p>
               </div>
               <button
                 onClick={() => setBidModalOpen(false)}
@@ -401,7 +401,7 @@ export default function AuctionsView({
                   <h4 className="text-lg font-black text-[#F7F4EC] uppercase">Bid Recorded Successfully</h4>
                   <p className="text-xs text-[#AEB4C0] max-w-sm mx-auto mt-1">Your bid of <strong>${bidAmountInput.toLocaleString()}</strong> has been timestamped and locked in the 1CA secure escrow ledger.</p>
                 </div>
-                <div className="text-[10px] bg-white/5 text-[#E3C27A] font-mono px-3 py-1 border border-white/5 rounded uppercase">
+                <div className="text-[13px] bg-white/5 text-[#E3C27A] font-mono px-3 py-1 border border-white/5 rounded uppercase">
                   Hash Locked: 1CA-BID-{targetLot.id}-{Date.now().toString().slice(-4)}
                 </div>
               </div>
@@ -413,23 +413,23 @@ export default function AuctionsView({
                 <img src={targetLot.image} alt="Lot" referrerPolicy="no-referrer" className="w-14 h-14 object-cover rounded" />
                 <div>
                   <h4 className="text-xs font-bold text-[#F7F4EC] line-clamp-1">{targetLot.title}</h4>
-                  <p className="text-[10px] text-[#AEB4C0]">{targetLot.karat} Gold • {targetLot.weight}g • Certified Purity</p>
+                  <p className="text-[13px] text-[#AEB4C0]">{targetLot.karat} Gold • {targetLot.weight}g • Certified Purity</p>
                 </div>
               </div>
 
               {/* Bidding selection slider / buttons */}
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-[#AEB4C0] uppercase font-bold">Current Bid</span>
+                  <span className="text-[13px] text-[#AEB4C0] uppercase font-bold">Current Bid</span>
                   <span className="text-sm font-bold text-[#F7F4EC]">${targetLot.currentBid.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-[rgba(255,255,255,0.06)]">
-                  <span className="text-[10px] text-[#C8A45D] uppercase font-bold">Minimum Next Bid (5%)</span>
+                  <span className="text-[13px] text-[#C8A45D] uppercase font-bold">Minimum Next Bid (5%)</span>
                   <span className="text-sm font-bold text-[#C8A45D]">${Math.ceil(targetLot.currentBid * 1.05).toLocaleString()}</span>
                 </div>
 
                 <div className="space-y-1.5 pt-1">
-                  <label className="block text-[10px] uppercase text-[#AEB4C0] font-bold">Your Custom Bid (USD)</label>
+                  <label className="block text-[13px] uppercase text-[#AEB4C0] font-bold">Your Custom Bid (USD)</label>
                   <input
                     type="number"
                     min={Math.ceil(targetLot.currentBid * 1.05)}
@@ -438,7 +438,7 @@ export default function AuctionsView({
                     className="w-full bg-[#080A0D] border border-[rgba(255,255,255,0.1)] focus:border-[#C8A45D] focus:outline-none p-3 rounded font-black text-lg text-[#E3C27A]"
                   />
                   {bidAmountInput < Math.ceil(targetLot.currentBid * 1.05) && (
-                    <p className="text-[10px] text-[#C85A5A] font-bold flex items-center gap-1">
+                    <p className="text-[13px] text-[#C85A5A] font-bold flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" /> Bid is below minimum threshold requirement.
                     </p>
                   )}
@@ -453,21 +453,21 @@ export default function AuctionsView({
                     onChange={(e) => setProxyBid(e.target.checked)}
                     className="accent-[#C8A45D]"
                   />
-                  <label htmlFor="proxy-toggle" className="text-[10px] text-[#AEB4C0] uppercase font-bold cursor-pointer select-none">
+                  <label htmlFor="proxy-toggle" className="text-[13px] text-[#AEB4C0] uppercase font-bold cursor-pointer select-none">
                     Enable Automatic Proxy Bid (1CA Proxy-Bot)
                   </label>
                 </div>
 
                 {proxyBid && (
                   <div className="p-3 bg-[#080A0D] rounded border border-white/5 space-y-2 animate-fade-in">
-                    <label className="block text-[9px] text-[#AEB4C0] uppercase font-bold">Maximum Bid Limit</label>
+                    <label className="block text-xs text-[#AEB4C0] uppercase font-bold">Maximum Bid Limit</label>
                     <input
                       type="number"
                       value={maxProxyAmount}
                       onChange={(e) => setMaxProxyAmount(parseInt(e.target.value) || 0)}
                       className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.06)] focus:border-[#C8A45D] focus:outline-none p-2 rounded text-sm text-[#F7F4EC] font-bold"
                     />
-                    <p className="text-[9px] text-[#AEB4C0]/70 leading-relaxed">
+                    <p className="text-xs text-[#AEB4C0]/70 leading-relaxed">
                       Our secure proxy algorithm will bid on your behalf in $50 increments up to your maximum limit to maintain your leading position.
                     </p>
                   </div>
@@ -476,7 +476,7 @@ export default function AuctionsView({
 
               {/* Pricing breakdown ledger */}
               <div className="bg-[#11141A] p-4 rounded-lg border border-[rgba(255,255,255,0.04)] text-xs space-y-2 text-[#AEB4C0]">
-                <h5 className="text-[9px] text-[#F7F4EC] uppercase tracking-wider font-bold mb-1">Financial Breakdown Ledger</h5>
+                <h5 className="text-xs text-[#F7F4EC] uppercase tracking-wider font-bold mb-1">Financial Breakdown Ledger</h5>
                 <div className="flex justify-between">
                   <span>Gross Placed Bid:</span>
                   <span className="font-bold text-[#F7F4EC]">${bidAmountInput.toLocaleString()}</span>
@@ -499,7 +499,7 @@ export default function AuctionsView({
                 </div>
               </div>
 
-              <div className="p-3 bg-red-500/5 rounded border border-red-500/10 text-[9px] text-[#AEB4C0] leading-relaxed">
+              <div className="p-3 bg-red-500/5 rounded border border-red-500/10 text-xs text-[#AEB4C0] leading-relaxed">
                 Legally Binding Contract Notice: By placing this digital signature, you verify identity and agree that your bid constitutes a binding purchase agreement if the lot meets reserve limits or ends.
               </div>
             </div>

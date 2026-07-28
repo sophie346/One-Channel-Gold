@@ -126,7 +126,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
         {/* Header bar */}
         <div className="p-5 bg-[#11141A] border-b border-[rgba(255,255,255,0.06)] flex justify-between items-center shrink-0">
           <div>
-            <span className="text-[9px] uppercase tracking-widest text-[#C8A45D] font-extrabold block">
+            <span className="text-xs uppercase tracking-widest text-[#C8A45D] font-extrabold block">
               1CA Workflow Portal
             </span>
             <h3 className="text-sm font-black text-[#F7F4EC] uppercase tracking-wider mt-0.5">
@@ -148,7 +148,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* Progress Tracker Horizontal Dots */}
           {step <= activeSteps.length && (
             <div className="pb-4 border-b border-[rgba(255,255,255,0.04)] flex items-center justify-between text-xs text-[#AEB4C0]">
-              <span className="font-bold text-[#C8A45D] uppercase tracking-widest text-[9px]">
+              <span className="font-bold text-[#C8A45D] uppercase tracking-widest text-xs">
                 Step {step} of {activeSteps.length}: {currentStepTitle}
               </span>
               <div className="flex gap-1.5">
@@ -172,7 +172,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {step === 1 && (type === 'sell' || type === 'pawn') && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Item Identification</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Item Identification</label>
                 <input
                   type="text"
                   placeholder="e.g. Broken 18K Curb Chain or Diamond Wedding Ring"
@@ -183,7 +183,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Asset Category</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Asset Category</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['jewelry', 'coins', 'bars', 'scrap', 'dental', 'nuggets'].map((c) => (
                     <button
@@ -204,7 +204,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
 
               {/* Photo Upload Area */}
               <div className="space-y-2">
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider font-bold">Upload Asset photographs</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider font-bold">Upload Asset photographs</label>
                 <div
                   onDragOver={handleDrag}
                   onDragLeave={handleDrag}
@@ -227,7 +227,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                 {uploadedPhotos.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-2">
                     {uploadedPhotos.map((p, idx) => (
-                      <span key={idx} className="text-[10px] bg-white/5 border border-white/5 px-2.5 py-1 rounded text-[#AEB4C0] flex items-center gap-1.5">
+                      <span key={idx} className="text-[13px] bg-white/5 border border-white/5 px-2.5 py-1 rounded text-[#AEB4C0] flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5 text-[#C8A45D]" />
                         {p}
                         <X className="w-3 h-3 text-red-400 cursor-pointer ml-1" onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))} />
@@ -244,7 +244,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Estimated Mass (Grams)</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Estimated Mass (Grams)</label>
                   <input
                     type="number"
                     value={weight || ''}
@@ -253,7 +253,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Assumed Karatage</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Assumed Karatage</label>
                   <select
                     value={karat}
                     onChange={(e) => setKarat(e.target.value)}
@@ -269,20 +269,20 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               {/* Dynamic Valuation screen inside form */}
               <div className="p-5 bg-[#11141A] rounded-lg border border-[rgba(255,255,255,0.06)] space-y-4">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#C8A45D] uppercase tracking-widest font-black">
+                  <div className="flex items-center gap-1.5 text-[13px] text-[#C8A45D] uppercase tracking-widest font-black">
                     <Calculator className="w-4 h-4" />
                     <span>Real-time Calculation Payout</span>
                   </div>
-                  <span className="text-[10px] bg-[#2F9D70]/10 text-[#2F9D70] font-bold px-2 py-0.5 rounded">Spot-Indexed</span>
+                  <span className="text-[13px] bg-[#2F9D70]/10 text-[#2F9D70] font-bold px-2 py-0.5 rounded">Spot-Indexed</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className="text-[#AEB4C0] uppercase text-[9px]">Melt Value</span>
+                    <span className="text-[#AEB4C0] uppercase text-xs">Melt Value</span>
                     <p className="text-xl font-bold text-[#F7F4EC]">${calcMeltValue.toLocaleString()}</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[#AEB4C0] uppercase text-[9px]">Indicative Offer Range</span>
+                    <span className="text-[#AEB4C0] uppercase text-xs">Indicative Offer Range</span>
                     <p className="text-xl font-bold text-[#E3C27A]">${calcMinOffer.toLocaleString()} – ${calcMaxOffer.toLocaleString()}</p>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* ==================== SELL GOLD STEP 3 ==================== */}
           {step === 3 && type === 'sell' && (
             <div className="space-y-4">
-              <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Select Intake / Shipping Method</label>
+              <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Select Intake / Shipping Method</label>
               
               <div className="space-y-3">
                 {[
@@ -323,7 +323,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                     }`}
                   >
                     <p className="text-xs font-bold">{m.title}</p>
-                    <p className="text-[10px] text-[#AEB4C0]/80 mt-1 leading-relaxed">{m.desc}</p>
+                    <p className="text-[13px] text-[#AEB4C0]/80 mt-1 leading-relaxed">{m.desc}</p>
                   </div>
                 ))}
               </div>
@@ -333,7 +333,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* ==================== PAWN STEP 3 (COLLATERAL PROPOSALS) ==================== */}
           {step === 3 && type === 'pawn' && (
             <div className="space-y-5">
-              <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black">1CA Pawn Collateral Pricing Options</h4>
+              <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black">1CA Pawn Collateral Pricing Options</h4>
               
               <div className="bg-[#11141A] border border-[rgba(255,255,255,0.06)] rounded-lg p-5 space-y-4 text-xs">
                 <div className="flex justify-between border-b border-white/5 pb-2">
@@ -356,7 +356,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
 
               <div className="p-3.5 bg-yellow-500/5 rounded border border-yellow-500/15 flex gap-2">
                 <AlertCircle className="w-4 h-4 text-[#D29B3C] shrink-0 mt-0.5" />
-                <p className="text-[9px] text-[#AEB4C0] leading-relaxed">
+                <p className="text-xs text-[#AEB4C0] leading-relaxed">
                   Notice: Pawn transactions do not constitute asset sales. If loan principal and interest are repaid prior to maturity, collateral is released in identical physical condition. Default will cause forfeiture but never impacts client credit score.
                 </p>
               </div>
@@ -368,7 +368,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Client Legal Name</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Client Legal Name</label>
                   <input
                     type="text"
                     required
@@ -379,7 +379,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Email Address</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Email Address</label>
                   <input
                     type="email"
                     required
@@ -392,7 +392,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Residential Street Address</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Residential Street Address</label>
                 <input
                   type="text"
                   required
@@ -405,8 +405,8 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
 
               {/* AML Document Scan Upload */}
               <div className="p-4 bg-[#11141A] border border-[rgba(255,255,255,0.04)] rounded-lg space-y-3">
-                <p className="text-[10px] uppercase text-[#C8A45D] font-bold">AML/Know-Your-Customer Verification Compliance</p>
-                <p className="text-[10px] text-[#AEB4C0] leading-relaxed">
+                <p className="text-[13px] uppercase text-[#C8A45D] font-bold">AML/Know-Your-Customer Verification Compliance</p>
+                <p className="text-[13px] text-[#AEB4C0] leading-relaxed">
                   Under Federal bank secrecy laws, we must verify owner identity prior to creating binding metal contracts. Upload an image of your passport or government driver&rsquo;s identification.
                 </p>
                 <div className="flex gap-2">
@@ -430,7 +430,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* ==================== SELL GOLD / PAWN STEP 5 (REVIEW & SIGN) ==================== */}
           {step === 5 && (type === 'sell' || type === 'pawn') && (
             <div className="space-y-4">
-              <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black">Audit Locked Contract Ledger Proposal</h4>
+              <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black">Audit Locked Contract Ledger Proposal</h4>
               
               <div className="bg-[#11141A] p-4 rounded-lg border border-[rgba(255,255,255,0.06)] text-xs space-y-2.5 text-[#AEB4C0]">
                 <div className="flex justify-between">
@@ -458,7 +458,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               {/* Signature panel */}
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Client digital Signature</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Client digital Signature</label>
                   <input
                     type="text"
                     required
@@ -478,7 +478,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                     onChange={(e) => setAcceptTerms(e.target.checked)}
                     className="accent-[#C8A45D] mt-0.5"
                   />
-                  <label htmlFor="terms-check" className="text-[9px] text-[#AEB4C0] leading-relaxed cursor-pointer select-none">
+                  <label htmlFor="terms-check" className="text-xs text-[#AEB4C0] leading-relaxed cursor-pointer select-none">
                     By checking this box, I declare that I have lawful legal possession of the submitted gold assets, all details are true, and I consent to secure record storing inside 1CA ledger database.
                   </label>
                 </div>
@@ -489,7 +489,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* ==================== APPRAISAL WORKFLOW STEPS ==================== */}
           {type === 'appraisal' && step === 1 && (
             <div className="space-y-4">
-              <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Appraisal Service Type</label>
+              <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Appraisal Service Type</label>
               <div className="space-y-2">
                 {[
                   'XRF Spectrometry & Metallurgical Certificate',
@@ -514,7 +514,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {type === 'appraisal' && step === 2 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Item Description</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Item Description</label>
                 <input
                   type="text"
                   placeholder="e.g. Vintage 22K Solid Wedding Band"
@@ -526,7 +526,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Weight Estimate (g)</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Weight Estimate (g)</label>
                   <input
                     type="number"
                     value={weight || ''}
@@ -535,7 +535,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Expected Karatage</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Expected Karatage</label>
                   <select
                     value={karat}
                     onChange={(e) => setKarat(e.target.value)}
@@ -553,7 +553,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {type === 'appraisal' && step === 3 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Laboratory Location</label>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Laboratory Location</label>
                 <div className="space-y-2">
                   {['NYC Manhattan Safe Vault', 'Zurich Central Laboratory', 'Chicago Loop Deposit Lobby'].map((loc) => (
                     <button
@@ -572,7 +572,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Select Date</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Select Date</label>
                   <input
                     type="date"
                     value={bookingDate}
@@ -581,7 +581,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Preferred Slot</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Preferred Slot</label>
                   <select
                     value={bookingTime}
                     onChange={(e) => setBookingTime(e.target.value)}
@@ -601,7 +601,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Owner Name</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Owner Name</label>
                   <input
                     type="text"
                     required
@@ -612,7 +612,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Email Address</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Email Address</label>
                   <input
                     type="email"
                     required
@@ -648,7 +648,7 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   onChange={(e) => setAcceptTerms(e.target.checked)}
                   className="accent-[#C8A45D] mt-0.5"
                 />
-                <label htmlFor="appraisal-terms" className="text-[9px] text-[#AEB4C0] leading-relaxed cursor-pointer select-none">
+                <label htmlFor="appraisal-terms" className="text-xs text-[#AEB4C0] leading-relaxed cursor-pointer select-none">
                   I agree to structural terms, legal disclosure holding liability limits, and understand that standard laboratory fees may apply upon assay certification completion.
                 </label>
               </div>
@@ -667,13 +667,13 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               </div>
 
               <div className="bg-[#11141A] p-4 rounded-lg border border-white/5 font-mono text-xs max-w-xs mx-auto space-y-1.5 text-left text-[#AEB4C0]">
-                <p className="text-[10px] uppercase text-[#C8A45D] font-bold">1CA SECURE LOG</p>
+                <p className="text-[13px] uppercase text-[#C8A45D] font-bold">1CA SECURE LOG</p>
                 <p>Status: <span className="text-[#2F9D70] font-bold">Audit Verified</span></p>
                 <p>Transaction ID: <span className="text-[#F7F4EC] font-bold">1CA-TX-{Math.floor(Math.random() * 900000 + 100000)}</span></p>
                 <p>Timestamp: <span className="text-[#F7F4EC] font-semibold">{new Date().toISOString().replace('T', ' ').slice(0, 19)} UTC</span></p>
               </div>
 
-              <p className="text-[10px] text-[#AEB4C0]/70 leading-relaxed max-w-md mx-auto">
+              <p className="text-[13px] text-[#AEB4C0]/70 leading-relaxed max-w-md mx-auto">
                 An automatic secure packaging kit or appointment confirmation has been sent to your registered email address. Use this tracker ID in your customer dashboard to inspect physical logistics.
               </p>
             </div>

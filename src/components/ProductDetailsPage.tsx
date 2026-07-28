@@ -104,7 +104,7 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
       <button
         onClick={() => router.push('/buy')}
-        className="flex items-center gap-2 text-xs font-bold text-[#AEB4C0] hover:text-[#C8A45D] uppercase tracking-widest mb-8 cursor-pointer"
+        className="flex items-center gap-2 text-sm font-bold text-[#AEB4C0] hover:text-[#C8A45D] uppercase tracking-widest mb-8 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Store
       </button>
@@ -125,7 +125,7 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
               </div>
             )}
             {product.karat && (
-              <span className="absolute top-4 left-4 text-[9px] uppercase bg-[#C8A45D] text-black font-black px-2.5 py-1 rounded-sm tracking-widest">
+              <span className="absolute top-4 left-4 text-[13px] uppercase bg-[#C8A45D] text-black font-black px-2.5 py-1 rounded-sm tracking-widest">
                 {product.karat} Pure
               </span>
             )}
@@ -158,62 +158,62 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
         <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] tracking-widest text-[#C8A45D] uppercase font-bold">{product.category}</span>
+              <span className="text-[13px] tracking-widest text-[#C8A45D] uppercase font-bold">{product.category}</span>
               <span className="text-white/20">•</span>
-              <span className="text-[10px] uppercase tracking-wider text-[#AEB4C0]">{product.metalColor}</span>
+              <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">{product.metalColor}</span>
               <span className="text-white/20">•</span>
-              <span className="text-[10px] uppercase bg-white/5 text-[#AEB4C0] px-2 py-0.5 rounded font-semibold">{product.condition}</span>
+              <span className="text-[13px] uppercase bg-white/5 text-[#AEB4C0] px-2 py-0.5 rounded font-semibold">{product.condition}</span>
             </div>
 
             <h1 className="text-2xl md:text-3xl font-black text-[#F7F4EC] tracking-tight">{product.name}</h1>
             {product.description ? (
-              <p className="text-sm text-[#AEB4C0] leading-relaxed">{product.description}</p>
+              <p className="text-base text-[#AEB4C0] leading-relaxed">{product.description}</p>
             ) : null}
 
             <div className="bg-[#0A0A0A] border border-white/[0.04] rounded-lg p-5">
-              <h4 className="text-[10px] text-[#C8A45D] uppercase tracking-widest font-black mb-3">Metallurgical Breakdown</h4>
+              <h4 className="text-[13px] text-[#C8A45D] uppercase tracking-widest font-black mb-3">Metallurgical Breakdown</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6">
                 {(product.karat || product.purity) && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Stated Purity</span>
-                    <p className="text-sm font-bold text-[#F7F4EC]">
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Stated Purity</span>
+                    <p className="text-base font-bold text-[#F7F4EC]">
                       {[product.karat, product.purity].filter(Boolean).join(' / ')}
                     </p>
                   </div>
                 )}
                 {product.weight > 0 && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Net Metal Weight</span>
-                    <p className="text-sm font-bold text-[#F7F4EC]">{product.weight} grams</p>
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Net Metal Weight</span>
+                    <p className="text-base font-bold text-[#F7F4EC]">{product.weight} grams</p>
                   </div>
                 )}
                 {product.hallmark && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Hallmark</span>
-                    <p className="text-sm font-bold text-[#F7F4EC]">{product.hallmark}</p>
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Hallmark</span>
+                    <p className="text-base font-bold text-[#F7F4EC]">{product.hallmark}</p>
                   </div>
                 )}
                 {product.size && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Size</span>
-                    <p className="text-sm font-bold text-[#F7F4EC]">{product.size}</p>
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Size</span>
+                    <p className="text-base font-bold text-[#F7F4EC]">{product.size}</p>
                   </div>
                 )}
                 {product.certificateNumber && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Certificate</span>
-                    <p className="text-sm font-mono text-[#E3C27A] font-bold">{product.certificateNumber}</p>
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Certificate</span>
+                    <p className="text-base font-mono text-[#E3C27A] font-bold">{product.certificateNumber}</p>
                   </div>
                 )}
                 {(product.osku || product.sku) && (
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">SKU</span>
-                    <p className="text-sm font-mono text-[#F7F4EC] font-bold">{product.osku || product.sku}</p>
+                    <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">SKU</span>
+                    <p className="text-base font-mono text-[#F7F4EC] font-bold">{product.osku || product.sku}</p>
                   </div>
                 )}
                 <div>
-                  <span className="text-[9px] uppercase tracking-wider text-[#AEB4C0]">Availability</span>
-                  <p className="text-sm font-bold text-[#2F9D70]">{product.availability}</p>
+                  <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">Availability</span>
+                  <p className="text-base font-bold text-[#2F9D70]">{product.availability}</p>
                 </div>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
 
           <div className="space-y-4 pt-4 border-t border-white/10">
             <div>
-              <span className="text-[10px] text-[#AEB4C0] uppercase tracking-wider">Melt Price Index</span>
+              <span className="text-[13px] text-[#AEB4C0] uppercase tracking-wider">Melt Price Index</span>
               <p className="text-4xl font-black text-[#E3C27A] mt-1">
                 ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </p>
@@ -257,7 +257,7 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-[11px] text-[#9CA3AF]">
+            <div className="flex flex-wrap gap-4 text-sm text-[#9CA3AF]">
               <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-[#C8A45D]" /> Insured</span>
               <span className="inline-flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[#C8A45D]" /> Secure Shipping</span>
               <span className="inline-flex items-center gap-1.5"><BadgeCheck className="w-3.5 h-3.5 text-[#C8A45D]" /> Verified Assay</span>

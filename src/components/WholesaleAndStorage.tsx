@@ -54,7 +54,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
       {/* SECTION 1: SECURE STORAGE PORTAL */}
       <div className="space-y-6">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">UL-Class 3 High-Security Vaulting</span>
+          <span className="text-[13px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">UL-Class 3 High-Security Vaulting</span>
           <h2 className="text-2xl md:text-3xl font-black text-[#F7F4EC] tracking-tight">Secure Vaulting &amp; Custody Solutions</h2>
           <p className="text-sm text-[#AEB4C0] max-w-3xl leading-relaxed mt-2">
             Insured and vaulted physical assets mapped down to the RFID lock and barcode level. 1CA monitors temperature, security statuses, and Lloyd&rsquo;s insurance valuation indexing in real-time.
@@ -68,7 +68,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
             
             <table className="w-full text-left text-xs text-[#AEB4C0] min-w-[600px]">
               <thead>
-                <tr className="border-b border-[rgba(255,255,255,0.08)] pb-2 text-[10px] text-[#AEB4C0]/70 uppercase tracking-wider">
+                <tr className="border-b border-[rgba(255,255,255,0.08)] pb-2 text-[13px] text-[#AEB4C0]/70 uppercase tracking-wider">
                   <th className="py-2.5">Record ID</th>
                   <th>Description</th>
                   <th>Vault Location</th>
@@ -83,11 +83,11 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
                   <tr key={item.id} className="hover:bg-white/20 transition-colors">
                     <td className="py-3 font-mono font-bold text-[#E3C27A]">{item.id}</td>
                     <td className="font-semibold text-[#F7F4EC]">{item.itemName}</td>
-                    <td className="text-[11px]">{item.vaultLocation}</td>
-                    <td className="font-mono text-[10px]">{item.binNumber} / {item.sealNumber}</td>
+                    <td className="text-sm">{item.vaultLocation}</td>
+                    <td className="font-mono text-[13px]">{item.binNumber} / {item.sealNumber}</td>
                     <td className="font-bold text-[#F7F4EC]">${item.insuranceValue.toLocaleString()}</td>
                     <td>
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                      <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
                         item.status === 'Secured' ? 'bg-[#2F9D70]/10 text-[#2F9D70]' : 'bg-white/10 text-[#AEB4C0]'
                       }`}>
                         {item.status}
@@ -97,12 +97,12 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
                       {item.status === 'Secured' ? (
                         <button
                           onClick={() => handleStorageRelease(item.id)}
-                          className="px-2.5 py-1 bg-white/5 hover:bg-red-500/15 hover:text-red-400 rounded text-[10px] uppercase font-bold tracking-wider cursor-pointer"
+                          className="px-2.5 py-1 bg-white/5 hover:bg-red-500/15 hover:text-red-400 rounded text-[13px] uppercase font-bold tracking-wider cursor-pointer"
                         >
                           Request Release
                         </button>
                       ) : (
-                        <span className="text-[9px] text-[#AEB4C0]/50 font-bold uppercase">Pending Release</span>
+                        <span className="text-xs text-[#AEB4C0]/50 font-bold uppercase">Pending Release</span>
                       )}
                     </td>
                   </tr>
@@ -120,18 +120,18 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
             
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-[#11141A] rounded border border-white/5 space-y-1">
-                <span className="block text-[9px] text-[#AEB4C0] uppercase font-bold">Physical Audit compliance</span>
-                <p className="text-[11px] text-[#F7F4EC] leading-normal font-semibold">Independent audits performed quarterly by Bureau Veritas standard certifications.</p>
+                <span className="block text-xs text-[#AEB4C0] uppercase font-bold">Physical Audit compliance</span>
+                <p className="text-sm text-[#F7F4EC] leading-normal font-semibold">Independent audits performed quarterly by Bureau Veritas standard certifications.</p>
               </div>
 
               <div className="p-3 bg-[#11141A] rounded border border-white/5 space-y-1">
-                <span className="block text-[9px] text-[#AEB4C0] uppercase font-bold">Chain-of-Custody Tracking</span>
-                <p className="text-[11px] text-[#F7F4EC] leading-normal font-semibold">Sealed multi-layered deposit packaging featuring tamper-evident RFID barcode systems.</p>
+                <span className="block text-xs text-[#AEB4C0] uppercase font-bold">Chain-of-Custody Tracking</span>
+                <p className="text-sm text-[#F7F4EC] leading-normal font-semibold">Sealed multi-layered deposit packaging featuring tamper-evident RFID barcode systems.</p>
               </div>
 
               <div className="p-3 bg-[#11141A] rounded border border-white/5 space-y-1">
-                <span className="block text-[9px] text-[#AEB4C0] uppercase font-bold">Insurance Index</span>
-                <p className="text-[11px] text-[#F7F4EC] leading-normal font-semibold">100% value protected against structural loss, damage, or theft by Lloyd&rsquo;s of London underwriters.</p>
+                <span className="block text-xs text-[#AEB4C0] uppercase font-bold">Insurance Index</span>
+                <p className="text-sm text-[#F7F4EC] leading-normal font-semibold">100% value protected against structural loss, damage, or theft by Lloyd&rsquo;s of London underwriters.</p>
               </div>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
       {/* SECTION 2: WHOLESALE B2B TRADING */}
       <div className="space-y-6">
         <div>
-          <span className="text-[10px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">Enterprise Dealer &amp; Institutional desk</span>
+          <span className="text-[13px] uppercase tracking-widest text-[#C8A45D] font-extrabold block mb-1">Enterprise Dealer &amp; Institutional desk</span>
           <h2 className="text-2xl md:text-3xl font-black text-[#F7F4EC] tracking-tight">Wholesale Gold Trading &amp; Volume Pricing</h2>
           <p className="text-sm text-[#AEB4C0] max-w-3xl leading-relaxed mt-2">
             Submit a verified B2B quote request to locking spot prices for bulk bars, coins, and mint bullion shipments. Integrated compliance pathways protect bulk liquidity.
@@ -167,7 +167,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
               ))}
             </div>
             
-            <div className="p-3 bg-[#11141A] rounded text-[10px] leading-relaxed text-[#AEB4C0]/70 flex items-start gap-1.5 border border-white/5">
+            <div className="p-3 bg-[#11141A] rounded text-[13px] leading-relaxed text-[#AEB4C0]/70 flex items-start gap-1.5 border border-white/5">
               <ShieldCheck className="w-4 h-4 text-[#C8A45D] shrink-0" />
               <span>Dealer Verification: Institutional wholesale accounts require IRS tax identification numbers (EIN) or corporate certificates of registry to lock pricing schedules.</span>
             </div>
@@ -186,7 +186,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
                 </div>
                 
                 <div className="bg-[#171A21] p-4 rounded font-mono text-xs max-w-sm mx-auto text-left space-y-1 border border-white/5 text-[#AEB4C0]">
-                  <p className="text-[10px] text-[#C8A45D] font-bold uppercase">1CA Spot Contract lock</p>
+                  <p className="text-[13px] text-[#C8A45D] font-bold uppercase">1CA Spot Contract lock</p>
                   <p>Target Mass: <span>{b2bWeightGrams.toLocaleString()} grams fine gold</span></p>
                   <p>Spot-Locked Rate: <span className="font-bold text-[#E3C27A]">${b2bLockedPrice.toLocaleString()} USD</span></p>
                   <p>Deal Code: <span>1CA-B2B-{Math.floor(Math.random() * 90000 + 10000)}</span></p>
@@ -203,7 +203,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
               <form onSubmit={handleB2BSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Registered Corporate Name</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Registered Corporate Name</label>
                     <input
                       type="text"
                       required
@@ -214,7 +214,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Corporate EIN / Tax identifier</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold">Corporate EIN / Tax identifier</label>
                     <input
                       type="text"
                       required
@@ -228,7 +228,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Target physical Asset</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Target physical Asset</label>
                     <select
                       value={b2bItem}
                       onChange={(e) => setB2bItem(e.target.value)}
@@ -241,7 +241,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Total target Mass (Grams)</label>
+                    <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-2 font-bold font-bold">Total target Mass (Grams)</label>
                     <input
                       type="number"
                       min="100"
@@ -254,7 +254,7 @@ export default function WholesaleAndStorage({ onShowNotification }: WholesaleAnd
 
                 <div className="p-4 bg-[#11141A] border border-[rgba(255,255,255,0.04)] rounded flex justify-between items-center text-xs">
                   <div>
-                    <span className="text-[#AEB4C0] block text-[9px] uppercase">Spot-indexed Quote Estimate</span>
+                    <span className="text-[#AEB4C0] block text-xs uppercase">Spot-indexed Quote Estimate</span>
                     <p className="text-xl font-bold text-[#E3C27A]">${calculateB2BOffer().toLocaleString()} USD</p>
                   </div>
                   <button

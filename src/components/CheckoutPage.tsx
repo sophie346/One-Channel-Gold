@@ -105,7 +105,7 @@ export default function CheckoutPage({
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
       <button
         onClick={() => router.push('/cart')}
-        className="inline-flex items-center gap-2 text-xs font-bold text-[#AEB4C0] hover:text-[#C8A45D] uppercase tracking-widest mb-6 cursor-pointer"
+        className="inline-flex items-center gap-2 text-sm font-bold text-[#AEB4C0] hover:text-[#C8A45D] uppercase tracking-widest mb-6 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Cart
       </button>
@@ -133,7 +133,7 @@ export default function CheckoutPage({
                 { key: 'country', label: 'Country', span: 1 },
               ].map((field) => (
                 <div key={field.key} className={field.span === 2 ? 'sm:col-span-2' : ''}>
-                  <label className="block text-[11px] text-[#9CA3AF] uppercase tracking-wider mb-1.5">
+                  <label className="block text-[13px] text-[#9CA3AF] uppercase tracking-wider mb-1.5">
                     {field.label}
                   </label>
                   <input
@@ -141,7 +141,7 @@ export default function CheckoutPage({
                     type={field.type || 'text'}
                     value={(form as any)[field.key]}
                     onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                    className="w-full bg-[#0A0A0A] border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#C8A45D]/50"
+                    className="w-full bg-[#0A0A0A] border border-white/10 rounded-lg px-3.5 py-3 text-base text-white focus:outline-none focus:border-[#C8A45D]/50"
                   />
                 </div>
               ))}

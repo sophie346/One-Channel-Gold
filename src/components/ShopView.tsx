@@ -191,19 +191,19 @@ export default function ShopView({
           <div className={`lg:col-span-3 space-y-5 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl p-5 space-y-5">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black text-[#F7F4EC] uppercase tracking-widest">Assay Filtering</h3>
+                <h3 className="text-sm font-black text-[#F7F4EC] uppercase tracking-widest">Assay Filtering</h3>
                 <SlidersHorizontal className="w-4 h-4 text-[#C8A45D]" />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Category</label>
+                <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Category</label>
                 <select
                   value={activeCategory}
                   onChange={(e) => {
                     setActiveCategory(e.target.value);
                     syncUrl({ category: e.target.value });
                   }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
+                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
@@ -212,14 +212,14 @@ export default function ShopView({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Karat Purity</label>
+                <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Karat Purity</label>
                 <select
                   value={selectedKarat}
                   onChange={(e) => {
                     setSelectedKarat(e.target.value);
                     syncUrl({ karat: e.target.value });
                   }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
+                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Purities</option>
                   <option value="24K">24K</option>
@@ -231,14 +231,14 @@ export default function ShopView({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Metal Color Tone</label>
+                <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Metal Color Tone</label>
                 <select
                   value={selectedColor}
                   onChange={(e) => {
                     setSelectedColor(e.target.value);
                     syncUrl({ color: e.target.value });
                   }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
+                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Tones</option>
                   <option value="Yellow Gold">Yellow Gold</option>
@@ -248,14 +248,14 @@ export default function ShopView({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Item Condition</label>
+                <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Item Condition</label>
                 <select
                   value={selectedCondition}
                   onChange={(e) => {
                     setSelectedCondition(e.target.value);
                     syncUrl({ condition: e.target.value });
                   }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
+                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Conditions</option>
                   <option value="Brand New">Brand New</option>
@@ -267,8 +267,8 @@ export default function ShopView({
 
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Max Price</label>
-                  <span className="text-[11px] font-bold text-[#C8A45D]">${priceRange.toLocaleString()}</span>
+                  <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Max Price</label>
+                  <span className="text-sm font-bold text-[#C8A45D]">${priceRange.toLocaleString()}</span>
                 </div>
                 <input
                   type="range"
@@ -284,14 +284,14 @@ export default function ShopView({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Sorting Parameter</label>
+                <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Sorting Parameter</label>
                 <select
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
                     syncUrl({ sort: e.target.value });
                   }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
+                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="featured">1CA Recommended</option>
                   <option value="price-asc">Price: Low-High</option>
@@ -302,7 +302,7 @@ export default function ShopView({
 
               <button
                 onClick={clearFilters}
-                className="w-full py-2.5 bg-[#11141A] border border-white/10 rounded text-xs text-[#AEB4C0] hover:text-white cursor-pointer"
+                className="w-full py-2.5 bg-[#11141A] border border-white/10 rounded text-sm text-[#AEB4C0] hover:text-white cursor-pointer"
               >
                 Clear Filters
               </button>
@@ -312,7 +312,7 @@ export default function ShopView({
           <div className="lg:hidden w-full flex justify-between gap-4 mb-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded text-xs text-[#AEB4C0]"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded text-sm text-[#AEB4C0]"
             >
               <SlidersHorizontal className="w-4 h-4 text-[#C8A45D]" />
               {showFilters ? 'Hide Filters' : 'Assay Filters'}
@@ -321,7 +321,7 @@ export default function ShopView({
 
           <div className="lg:col-span-9">
             {!loading && !error && (
-              <p className="text-[11px] text-[#AEB4C0] mb-4 uppercase tracking-wider">
+              <p className="text-sm text-[#AEB4C0] mb-4 uppercase tracking-wider">
                 Showing {filteredProducts.length}
                 {totalProducts > 0 ? ` · ${totalProducts} in catalog` : ''}
               </p>
@@ -336,7 +336,7 @@ export default function ShopView({
               <div className="p-12 text-center bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-3">
                 <ShieldAlert className="w-8 h-8 text-[#D29B3C] mx-auto" />
                 <h3 className="text-sm font-bold text-[#F7F4EC] uppercase">Catalog unavailable</h3>
-                <p className="text-xs text-[#AEB4C0] max-w-sm mx-auto">{error}</p>
+                <p className="text-sm text-[#AEB4C0] max-w-sm mx-auto">{error}</p>
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -357,19 +357,19 @@ export default function ShopView({
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs text-[#AEB4C0]">
+                            <div className="w-full h-full flex items-center justify-center text-sm text-[#AEB4C0]">
                               No image
                             </div>
                           )}
                         </button>
                         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 pointer-events-none">
                           {product.karat && (
-                            <span className="text-[9px] uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
+                            <span className="text-[13px] uppercase bg-[#C8A45D] text-[#080A0D] font-extrabold px-2 py-0.5 rounded tracking-wider">
                               {product.karat} Pure
                             </span>
                           )}
                           {product.weight > 0 && (
-                            <span className="text-[9px] uppercase bg-[#11141A]/90 text-[#AEB4C0] font-semibold px-2 py-0.5 rounded tracking-wide border border-white/5">
+                            <span className="text-[13px] uppercase bg-[#11141A]/90 text-[#AEB4C0] font-semibold px-2 py-0.5 rounded tracking-wide border border-white/5">
                               {product.weight}g
                             </span>
                           )}
@@ -386,22 +386,22 @@ export default function ShopView({
                       <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-center">
-                            <span className="text-[9px] font-bold text-[#C8A45D] uppercase tracking-wider">{product.category}</span>
-                            <span className="text-[9px] font-semibold text-[#AEB4C0] uppercase">{product.metalColor}</span>
+                            <span className="text-[13px] font-bold text-[#C8A45D] uppercase tracking-wider">{product.category}</span>
+                            <span className="text-[13px] font-semibold text-[#AEB4C0] uppercase">{product.metalColor}</span>
                           </div>
                           <h3
                             onClick={() => openProduct(product)}
-                            className="text-sm font-bold text-[#F7F4EC] tracking-tight hover:text-[#E3C27A] transition-colors cursor-pointer line-clamp-1"
+                            className="text-base font-bold text-[#F7F4EC] tracking-tight hover:text-[#E3C27A] transition-colors cursor-pointer line-clamp-1"
                           >
                             {product.name}
                           </h3>
-                          <p className="text-[11px] text-[#AEB4C0]/75 line-clamp-2 leading-relaxed">{product.description}</p>
+                          <p className="text-[15px] text-[#AEB4C0]/75 line-clamp-2 leading-relaxed">{product.description}</p>
                         </div>
 
                         <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] flex justify-between items-center">
                           <div>
-                            <span className="text-[9px] text-[#AEB4C0] uppercase">Melt price index</span>
-                            <p className="text-base font-black text-[#E3C27A]">
+                            <span className="text-sm text-[#AEB4C0] uppercase">Melt price index</span>
+                            <p className="text-lg font-black text-[#E3C27A]">
                               ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </p>
                           </div>
@@ -434,7 +434,7 @@ export default function ShopView({
               <div className="p-12 text-center bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-3">
                 <ShieldAlert className="w-8 h-8 text-[#D29B3C] mx-auto" />
                 <h3 className="text-sm font-bold text-[#F7F4EC] uppercase">No physical assets match</h3>
-                <p className="text-xs text-[#AEB4C0] max-w-sm mx-auto">
+                <p className="text-sm text-[#AEB4C0] max-w-sm mx-auto">
                   Try clearing filters or widening the max price.
                 </p>
                 <button

@@ -81,7 +81,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
   const StatusCell = ({ value }: { value: boolean | string }) => {
     if (value === true) return <Check className="w-4 h-4 text-[#C8A45D] mx-auto" />;
-    if (value === 'partial') return <span className="text-[11px] text-[#9CA3AF]">Partial</span>;
+    if (value === 'partial') return <span className="text-sm text-[#9CA3AF]">Partial</span>;
     return <X className="w-4 h-4 text-[#4B5563] mx-auto" />;
   };
 
@@ -92,7 +92,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
         <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-[#C8A45D]/[0.07] rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-[#C8A45D]/[0.04] rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-7">
               <h1 className="font-serif text-[40px] sm:text-[52px] lg:text-[58px] leading-[1.08] tracking-tight text-white font-medium">
@@ -139,11 +139,11 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
               {/* Floating labels */}
               <div className="absolute top-[12%] left-[4%] md:left-[8%] bg-[#141414]/90 backdrop-blur border border-white/10 rounded-xl px-3.5 py-2.5 shadow-xl animate-float">
-                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">Purity</p>
+                <p className="text-[13px] uppercase tracking-wider text-[#9CA3AF]">Purity</p>
                 <p className="text-[14px] font-semibold text-[#E3C27A]">99.99%</p>
               </div>
               <div className="absolute top-[28%] right-[2%] md:right-[6%] bg-[#141414]/90 backdrop-blur border border-white/10 rounded-xl px-3.5 py-2.5 shadow-xl animate-float-delayed">
-                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">Weight</p>
+                <p className="text-[13px] uppercase tracking-wider text-[#9CA3AF]">Weight</p>
                 <p className="text-[14px] font-semibold text-white">1 oz</p>
               </div>
               <div className="absolute bottom-[22%] left-[6%] bg-[#141414]/90 backdrop-blur border border-white/10 rounded-xl px-3.5 py-2.5 shadow-xl animate-float">
@@ -153,7 +153,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                 </div>
               </div>
               <div className="absolute bottom-[10%] right-[10%] bg-[#141414]/90 backdrop-blur border border-white/10 rounded-xl px-3.5 py-2.5 shadow-xl animate-float-delayed">
-                <p className="text-[10px] uppercase tracking-wider text-[#9CA3AF]">Location</p>
+                <p className="text-[13px] uppercase tracking-wider text-[#9CA3AF]">Location</p>
                 <p className="text-[14px] font-semibold text-white">Zurich Vault</p>
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
           {/* Partner strip */}
           <div className="mt-16 md:mt-20 pt-10 border-t border-white/[0.06]">
-            <p className="text-center text-[11px] uppercase tracking-[0.2em] text-[#6B7280] mb-6">
+            <p className="text-center text-sm uppercase tracking-[0.2em] text-[#6B7280] mb-6">
               Trusted by industry leaders
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-40">
@@ -177,7 +177,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== GOLD PRICES ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="max-w-2xl">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Live Market</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -203,7 +203,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                     <button
                       key={t}
                       onClick={() => setTimeframe(t)}
-                      className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-colors cursor-pointer ${
+                      className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors cursor-pointer ${
                         timeframe === t
                           ? 'bg-[#C8A45D]/15 text-[#E3C27A]'
                           : 'text-[#6B7280] hover:text-white'
@@ -234,7 +234,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                   { label: 'Volume', value: '1.2M oz' },
                 ].map((s) => (
                   <div key={s.label} className="bg-[#0A0A0A] rounded-xl px-3.5 py-3 border border-white/[0.04]">
-                    <p className="text-[11px] text-[#6B7280] mb-0.5">{s.label}</p>
+                    <p className="text-sm text-[#6B7280] mb-0.5">{s.label}</p>
                     <p className="text-[14px] font-semibold text-white">{s.value}</p>
                   </div>
                 ))}
@@ -257,7 +257,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
               <div className="space-y-4 flex-1">
                 <div>
-                  <label className="block text-[11px] text-[#9CA3AF] mb-1.5 uppercase tracking-wider">Amount (oz)</label>
+                  <label className="block text-sm text-[#9CA3AF] mb-1.5 uppercase tracking-wider">Amount (oz)</label>
                   <input
                     type="number"
                     min="0.01"
@@ -268,7 +268,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-[#9CA3AF] mb-1.5 uppercase tracking-wider">Price / oz</label>
+                  <label className="block text-sm text-[#9CA3AF] mb-1.5 uppercase tracking-wider">Price / oz</label>
                   <div className="w-full bg-[#0A0A0A] border border-white/[0.08] rounded-lg px-3.5 py-3 text-[15px] text-white">
                     ${spot.toFixed(2)}
                   </div>
@@ -303,7 +303,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== FEATURES ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Platform</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -339,7 +339,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== AUCTIONS ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Auctions</p>
@@ -371,10 +371,10 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                 </div>
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-[#C8A45D] bg-[#C8A45D]/10 px-2 py-0.5 rounded">
+                    <span className="text-[13px] uppercase tracking-wider font-semibold text-[#C8A45D] bg-[#C8A45D]/10 px-2 py-0.5 rounded">
                       Live
                     </span>
-                    <span className="text-[11px] text-[#6B7280]">{lot.lotNumber}</span>
+                    <span className="text-sm text-[#6B7280]">{lot.lotNumber}</span>
                   </div>
                   <h3 className="text-[15px] font-semibold text-white leading-snug line-clamp-2">{lot.title}</h3>
                   <div className="flex items-center gap-1.5 text-[12px] text-[#9CA3AF]">
@@ -383,7 +383,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-[#6B7280]">Current Bid</p>
+                      <p className="text-[13px] uppercase tracking-wider text-[#6B7280]">Current Bid</p>
                       <p className="text-[18px] font-semibold text-[#E3C27A]">
                         ${lot.currentBid.toLocaleString()}
                       </p>
@@ -404,7 +404,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== SELL TRANSPARENCY ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-6">
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Sell Gold</p>
@@ -452,7 +452,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
             <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-6 md:p-7 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[15px] font-semibold text-white">Valuation Receipt</h3>
-                <span className="text-[11px] text-[#2F9D70] font-medium bg-[#2F9D70]/10 px-2.5 py-1 rounded-full">
+                <span className="text-sm text-[#2F9D70] font-medium bg-[#2F9D70]/10 px-2.5 py-1 rounded-full">
                   Live Estimate
                 </span>
               </div>
@@ -484,7 +484,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== LOANS / PAWN ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Loan calculator */}
             <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-6 md:p-7 order-2 lg:order-1">
@@ -520,11 +520,11 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                 </div>
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div className="bg-[#0A0A0A] rounded-xl p-3.5 border border-white/[0.04]">
-                    <p className="text-[11px] text-[#6B7280] mb-1">Loan Amount (70% LTV)</p>
+                    <p className="text-sm text-[#6B7280] mb-1">Loan Amount (70% LTV)</p>
                     <p className="text-[18px] font-semibold text-white">${loanPrincipal.toLocaleString()}</p>
                   </div>
                   <div className="bg-[#0A0A0A] rounded-xl p-3.5 border border-white/[0.04]">
-                    <p className="text-[11px] text-[#6B7280] mb-1">Interest Rate</p>
+                    <p className="text-sm text-[#6B7280] mb-1">Interest Rate</p>
                     <p className="text-[18px] font-semibold text-white">2.4% / mo</p>
                   </div>
                 </div>
@@ -573,7 +573,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== INFRASTRUCTURE ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Infrastructure</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -639,7 +639,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== TRUST COMPARISON ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Trust</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -674,7 +674,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== SECURITY ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Security</p>
@@ -706,7 +706,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
 
       {/* ===== DASHBOARD PREVIEW ===== */}
       <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1280px] mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Portal</p>
@@ -762,7 +762,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                     { label: 'Open Bids', value: '5', color: 'text-white' },
                   ].map((s) => (
                     <div key={s.label} className="bg-[#0A0A0A] border border-white/[0.06] rounded-xl p-3.5">
-                      <p className="text-[11px] text-[#6B7280] mb-1">{s.label}</p>
+                      <p className="text-sm text-[#6B7280] mb-1">{s.label}</p>
                       <p className={`text-[18px] font-semibold ${s.color}`}>{s.value}</p>
                     </div>
                   ))}
@@ -783,7 +783,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
                         <span className="text-white font-medium">{row.action}</span>
                         <div className="flex items-center gap-4">
                           <span className="text-[#9CA3AF] hidden sm:inline">{row.amount}</span>
-                          <span className="text-[11px] font-medium text-[#2F9D70] bg-[#2F9D70]/10 px-2 py-0.5 rounded-full">
+                          <span className="text-sm font-medium text-[#2F9D70] bg-[#2F9D70]/10 px-2 py-0.5 rounded-full">
                             {row.status}
                           </span>
                         </div>
