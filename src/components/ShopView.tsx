@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2 } from 'lucide-react';
 import { Product } from '../types';
 import { useAppDispatch } from '@/store/hooks';
@@ -16,6 +16,19 @@ interface ShopViewProps {
   onShowNotification?: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
+const CATEGORIES = [
+  { label: 'All Catalog', value: 'all' },
+  { label: 'Rings', value: 'rings' },
+  { label: 'Chains', value: 'chains' },
+  { label: 'Necklaces', value: 'necklaces' },
+  { label: 'Bracelets', value: 'bracelets' },
+  { label: 'Earrings', value: 'earrings' },
+  { label: 'Pendants', value: 'pendants' },
+  { label: 'Coins', value: 'coins' },
+  { label: 'Bars', value: 'bars' },
+  { label: 'Estate / Antique', value: 'antique' },
+];
+
 export default function ShopView({
   wishlist,
   toggleWishlist,
@@ -23,30 +36,63 @@ export default function ShopView({
   onShowNotification,
 }: ShopViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [selectedKarat, setSelectedKarat] = useState<string>('all');
-  const [selectedColor, setSelectedColor] = useState<string>('all');
-  const [selectedCondition, setSelectedCondition] = useState<string>('all');
-  const [priceRange, setPriceRange] = useState<number>(10000);
-  const [sortBy, setSortBy] = useState<string>('featured');
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedKarat, setSelectedKarat] = useState(searchParams.get('karat') || 'all');
+  const [selectedColor, setSelectedColor] = useState(searchParams.get('color') || 'all');
+  const [selectedCondition, setSelectedCondition] = useState(searchParams.get('condition') || 'all');
+  const [priceRange, setPriceRange] = useState(Number(searchParams.get('maxPrice')) || 10000);
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'featured');
+  const [showFilters, setShowFilters] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = [
-    { label: 'All Catalog', value: 'all' },
-    { label: 'Rings', value: 'rings' },
-    { label: 'Chains', value: 'chains' },
-    { label: 'Necklaces', value: 'necklaces' },
-    { label: 'Bracelets', value: 'bracelets' },
-    { label: 'Coins', value: 'coins' },
-    { label: 'Bars', value: 'bars' },
-    { label: 'Estate / Antique', value: 'antique' },
-  ];
+  const syncUrl = useCallback(
+    (next: {
+      category?: string;
+      karat?: string;
+      color?: string;
+      condition?: string;
+      maxPrice?: number;
+      sort?: string;
+    }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const setOrDelete = (key: string, value: string, emptyValues: string[]) => {
+        if (!value || emptyValues.includes(value)) params.delete(key);
+        else params.set(key, value);
+      };
+
+      setOrDelete('category', next.category ?? activeCategory, ['all']);
+      setOrDelete('karat', next.karat ?? selectedKarat, ['all']);
+      setOrDelete('color', next.color ?? selectedColor, ['all']);
+      setOrDelete('condition', next.condition ?? selectedCondition, ['all']);
+      setOrDelete('sort', next.sort ?? sortBy, ['featured']);
+
+      const max = next.maxPrice ?? priceRange;
+      if (max < 10000) params.set('maxPrice', String(max));
+      else params.delete('maxPrice');
+
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [
+      searchParams,
+      activeCategory,
+      selectedKarat,
+      selectedColor,
+      selectedCondition,
+      sortBy,
+      priceRange,
+      pathname,
+      router,
+    ],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -92,21 +138,29 @@ export default function ShopView({
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        if (selectedKarat !== 'all' && product.karat !== selectedKarat) return false;
+        if (selectedKarat !== 'all') {
+          const want = selectedKarat.toUpperCase();
+          if (product.karat.toUpperCase() !== want) return false;
+        }
         if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
         if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
+        if (product.price > priceRange) return false;
         return true;
       })
       .sort((a, b) => {
         if (sortBy === 'weight-desc') return b.weight - a.weight;
+        if (sortBy === 'price-asc') return a.price - b.price;
+        if (sortBy === 'price-desc') return b.price - a.price;
         return 0;
       });
-  }, [products, selectedKarat, selectedColor, selectedCondition, sortBy]);
+  }, [products, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy]);
 
   const openProduct = (product: Product) => {
-    const path = product.slug
-      ? `/buy/${encodeURIComponent(product.slug)}`
-      : `/buy/product?sku=${encodeURIComponent(product.osku || product.sku || product.id)}`;
+    const slug = product.slug || product.osku || product.id;
+    const sku = product.osku || product.sku || '';
+    const path = `/buy/${encodeURIComponent(slug)}${
+      sku ? `?sku=${encodeURIComponent(sku)}` : ''
+    }`;
     router.push(path);
   };
 
@@ -122,13 +176,18 @@ export default function ShopView({
     setSelectedCondition('all');
     setPriceRange(10000);
     setSortBy('featured');
+    router.replace(pathname, { scroll: false });
   };
 
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="mb-6">
+          <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-2">Market</p>
+          <h1 className="font-serif text-3xl md:text-4xl text-white font-medium">Buy Verified Gold</h1>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Filters sidebar */}
           <div className={`lg:col-span-3 space-y-5 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl p-5 space-y-5">
               <div className="flex items-center justify-between">
@@ -140,10 +199,13 @@ export default function ShopView({
                 <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Category</label>
                 <select
                   value={activeCategory}
-                  onChange={(e) => setActiveCategory(e.target.value)}
+                  onChange={(e) => {
+                    setActiveCategory(e.target.value);
+                    syncUrl({ category: e.target.value });
+                  }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
                 >
-                  {categories.map((c) => (
+                  {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
                   ))}
                 </select>
@@ -153,7 +215,10 @@ export default function ShopView({
                 <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Karat Purity</label>
                 <select
                   value={selectedKarat}
-                  onChange={(e) => setSelectedKarat(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedKarat(e.target.value);
+                    syncUrl({ karat: e.target.value });
+                  }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Purities</option>
@@ -161,6 +226,7 @@ export default function ShopView({
                   <option value="22K">22K</option>
                   <option value="18K">18K</option>
                   <option value="14K">14K</option>
+                  <option value="925">Sterling (925)</option>
                 </select>
               </div>
 
@@ -168,7 +234,10 @@ export default function ShopView({
                 <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Metal Color Tone</label>
                 <select
                   value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedColor(e.target.value);
+                    syncUrl({ color: e.target.value });
+                  }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Tones</option>
@@ -182,7 +251,10 @@ export default function ShopView({
                 <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Item Condition</label>
                 <select
                   value={selectedCondition}
-                  onChange={(e) => setSelectedCondition(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedCondition(e.target.value);
+                    syncUrl({ condition: e.target.value });
+                  }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Conditions</option>
@@ -200,11 +272,13 @@ export default function ShopView({
                 </div>
                 <input
                   type="range"
-                  min={500}
+                  min={50}
                   max={10000}
-                  step={100}
+                  step={50}
                   value={priceRange}
                   onChange={(e) => setPriceRange(Number(e.target.value))}
+                  onMouseUp={(e) => syncUrl({ maxPrice: Number((e.target as HTMLInputElement).value) })}
+                  onTouchEnd={(e) => syncUrl({ maxPrice: Number((e.target as HTMLInputElement).value) })}
                   className="w-full accent-[#C8A45D] cursor-pointer"
                 />
               </div>
@@ -213,7 +287,10 @@ export default function ShopView({
                 <label className="text-[10px] uppercase tracking-wider text-[#AEB4C0] font-bold">Sorting Parameter</label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    syncUrl({ sort: e.target.value });
+                  }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-xs text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="featured">1CA Recommended</option>
@@ -232,7 +309,7 @@ export default function ShopView({
             </div>
           </div>
 
-          <div className="lg:hidden w-full flex justify-between gap-4 mb-2 lg:mb-0">
+          <div className="lg:hidden w-full flex justify-between gap-4 mb-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded text-xs text-[#AEB4C0]"
@@ -245,8 +322,8 @@ export default function ShopView({
           <div className="lg:col-span-9">
             {!loading && !error && (
               <p className="text-[11px] text-[#AEB4C0] mb-4 uppercase tracking-wider">
-                {filteredProducts.length}
-                {totalProducts > filteredProducts.length ? ` of ${totalProducts}` : ''} assets
+                Showing {filteredProducts.length}
+                {totalProducts > 0 ? ` · ${totalProducts} in catalog` : ''}
               </p>
             )}
 
@@ -271,7 +348,7 @@ export default function ShopView({
                       className="bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-lg overflow-hidden flex flex-col justify-between group hover:border-[#C8A45D]/50 transition-all duration-300"
                     >
                       <div className="aspect-square bg-[#080A0D] overflow-hidden relative">
-                        <button onClick={() => openProduct(product)} className="w-full h-full cursor-pointer">
+                        <button type="button" onClick={() => openProduct(product)} className="w-full h-full cursor-pointer">
                           {product.image ? (
                             <img
                               src={product.image}
@@ -298,6 +375,7 @@ export default function ShopView({
                           )}
                         </div>
                         <button
+                          type="button"
                           onClick={() => toggleWishlist(product.id)}
                           className="absolute top-2.5 right-2.5 p-2 bg-[#080A0D]/75 backdrop-blur-sm rounded-full border border-[rgba(255,255,255,0.08)] hover:bg-[#C8A45D]/10 hover:border-[#C8A45D] cursor-pointer"
                         >
@@ -329,6 +407,7 @@ export default function ShopView({
                           </div>
                           <div className="flex gap-1.5">
                             <button
+                              type="button"
                               onClick={() => openProduct(product)}
                               className="p-2 bg-white/5 hover:bg-[#C8A45D]/10 hover:text-[#C8A45D] rounded text-[#AEB4C0] transition-all cursor-pointer border border-transparent hover:border-[#C8A45D]/30"
                               title="View Details"
@@ -336,8 +415,10 @@ export default function ShopView({
                               <Eye className="w-3.5 h-3.5" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleAddToCart(product)}
-                              className="p-2 bg-[#C8A45D] hover:bg-[#E3C27A] rounded text-[#080A0D] transition-all cursor-pointer"
+                              disabled={product.availability === 'Sold'}
+                              className="p-2 bg-[#C8A45D] hover:bg-[#E3C27A] disabled:opacity-40 rounded text-[#080A0D] transition-all cursor-pointer"
                               title="Add to Cart"
                             >
                               <ShoppingCart className="w-3.5 h-3.5" />
@@ -354,8 +435,15 @@ export default function ShopView({
                 <ShieldAlert className="w-8 h-8 text-[#D29B3C] mx-auto" />
                 <h3 className="text-sm font-bold text-[#F7F4EC] uppercase">No physical assets match</h3>
                 <p className="text-xs text-[#AEB4C0] max-w-sm mx-auto">
-                  Try widening your price margins or select another karat purity factor.
+                  Try clearing filters or widening the max price.
                 </p>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-[12px] font-semibold text-[#C8A45D] cursor-pointer"
+                >
+                  Clear Filters
+                </button>
               </div>
             )}
           </div>

@@ -28,9 +28,25 @@ function attr(
       }
     }
   }
+
+  const specs = product.specifications;
+  if (specs && typeof specs === 'object') {
+    for (const key of keys) {
+      const value = (specs as Record<string, unknown>)[key];
+      if (value != null && value !== '') {
+        if (Array.isArray(value)) return String(value[0] ?? '');
+        if (typeof value === 'string' || typeof value === 'number') return value;
+      }
+    }
+  }
+
   for (const key of keys) {
     const value = product[key];
-    if (value != null && value !== '' && (typeof value === 'string' || typeof value === 'number')) {
+    if (
+      value != null &&
+      value !== '' &&
+      (typeof value === 'string' || typeof value === 'number')
+    ) {
       return value;
     }
   }
@@ -55,8 +71,14 @@ export function getProductImages(product: ApiProduct): string[] {
     .filter(Boolean);
 }
 
-function normalizeCategory(raw: unknown): Product['category'] {
-  const value = String(raw || '')
+function firstCategory(raw: unknown): string {
+  if (Array.isArray(raw) && raw.length) return String(raw[0] || '');
+  if (typeof raw === 'string') return raw;
+  return '';
+}
+
+export function normalizeCategory(raw: unknown): Product['category'] {
+  const value = firstCategory(raw)
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-');
@@ -75,11 +97,30 @@ function normalizeCategory(raw: unknown): Product['category'] {
   return 'custom';
 }
 
+/** Map UI filter value → Nexus `attributes.category` value (e.g. rings → RINGS). */
+export function toApiCategory(value: string): string {
+  if (!value || value === 'all') return '';
+  const map: Record<string, string> = {
+    rings: 'RINGS',
+    chains: 'CHAINS',
+    necklaces: 'NECKLACES',
+    bracelets: 'BRACELETS',
+    earrings: 'EARRINGS',
+    pendants: 'PENDANTS',
+    coins: 'COINS',
+    bars: 'BARS',
+    antique: 'ANTIQUE',
+    custom: 'CUSTOM',
+  };
+  return map[value.toLowerCase()] || value.toUpperCase();
+}
+
 function normalizeMetalColor(raw: unknown): Product['metalColor'] {
   const value = String(raw || '').toLowerCase();
   if (value.includes('white')) return 'White Gold';
   if (value.includes('rose') || value.includes('pink')) return 'Rose Gold';
   if (value.includes('multi')) return 'Multi-Tone';
+  if (value.includes('silver') || value.includes('sterling')) return 'White Gold';
   return 'Yellow Gold';
 }
 
@@ -96,11 +137,20 @@ function normalizeAvailability(product: ApiProduct): Product['availability'] {
     product.outofstock === true ||
     product.outofstock === 'True' ||
     product.outofstock === 'true' ||
-    Number(product.quantity) === 0;
+    Number(product.quantity) === 0 ||
+    Number(product.stockQty) === 0;
   return out ? 'Sold' : 'In Stock';
 }
 
-function slugify(input: string): string {
+function extractKarat(...sources: unknown[]): string {
+  const blob = sources.map((s) => String(s || '')).join(' ');
+  const match = blob.match(/\b(24|22|18|14|10)\s*[- ]?\s*k(?:arat)?\b/i);
+  if (match) return `${match[1]}K`;
+  if (/sterling|silver/i.test(blob)) return '925';
+  return '';
+}
+
+export function slugify(input: string): string {
   return input
     .toLowerCase()
     .trim()
@@ -108,21 +158,27 @@ function slugify(input: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/** Map oneauto BFF product → Gold storefront `Product`. */
+/** Map oneauto / Nexus BFF product → Gold storefront `Product`. */
 export function mapApiProductToProduct(api: ApiProduct): Product {
   const images = getProductImages(api);
-  const title =
-    String(api.website_title || api.title || attr(api, 'title') || api.osku || 'Product');
+  const title = String(
+    api.website_title || api.title || attr(api, 'title') || api.osku || 'Product',
+  );
   const slugFromAttrs = attr(api, 'slug');
   const slug =
     String(api.slug || slugFromAttrs || '').trim() ||
     slugify(String(api.osku || api.sku || title));
 
-  const karat = String(attr(api, 'karat', 'Karat', 'purity_karat') || '24K');
+  const categoryRaw =
+    api.category || attr(api, 'category', 'Category') || api.brand;
+  const colorRaw = attr(api, 'color', 'metalColor', 'metal_color', 'tone');
+  const materialRaw = attr(api, 'material', 'Material');
+  const karat =
+    extractKarat(title, api.description, materialRaw, attr(api, 'karat', 'Karat')) ||
+    String(attr(api, 'karat', 'Karat', 'purity_karat') || '');
   const purityRaw = attr(api, 'purity', 'Purity');
   const weightRaw = attr(api, 'weight', 'Weight', 'net_weight', 'metal_weight');
   const weight = Number(weightRaw);
-  const categoryRaw = attr(api, 'category', 'Category') || api.brand;
 
   return {
     id: String(api.osku || api.sku || slug),
@@ -131,7 +187,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     category: normalizeCategory(categoryRaw),
     karat,
     weight: Number.isFinite(weight) ? weight : 0,
-    purity: String(purityRaw || ''),
+    purity: String(purityRaw || (karat === '925' ? 'Sterling' : '')),
     hallmark: String(attr(api, 'hallmark', 'Hallmark', 'certificate') || ''),
     price: Number(api.price) || 0,
     image: images[0] || '',
@@ -140,19 +196,19 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
       api.description ||
         attr(api, 'description', 'Description', 'shortdescription') ||
         '',
-    ),
+    ).replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''),
     certificateStatus: attr(api, 'certificateStatus', 'certificate_status')
       ? 'Verified'
       : attr(api, 'certificateNumber', 'certificate_number')
         ? 'Pending'
         : 'None',
-    certificateNumber: String(
-      attr(api, 'certificateNumber', 'certificate_number', 'certificate') || '',
-    ) || undefined,
+    certificateNumber:
+      String(attr(api, 'certificateNumber', 'certificate_number', 'certificate') || '') ||
+      undefined,
     availability: normalizeAvailability(api),
-    metalColor: normalizeMetalColor(attr(api, 'metalColor', 'metal_color', 'color', 'tone')),
+    metalColor: normalizeMetalColor(colorRaw || title),
     condition: normalizeCondition(attr(api, 'condition', 'Condition')),
-    size: String(attr(api, 'size', 'Size') || '') || undefined,
+    size: String(attr(api, 'size', 'Size', 'length', 'width') || '') || undefined,
     osku: api.osku,
     sku: api.sku,
     brand: api.brand ? String(api.brand) : undefined,

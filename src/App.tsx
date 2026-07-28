@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert
+  ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert, Loader2
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -27,6 +27,15 @@ import { pathToTab, tabToPath, getProductSlug } from '@/routes';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutUser, clearAuthError } from '@/store/authSlice';
 import { selectCartCount, selectCartItems } from '@/store/cartSlice';
+
+function PageLoader() {
+  return (
+    <div className="py-20 flex flex-col items-center gap-3 text-[#AEB4C0]">
+      <Loader2 className="w-8 h-8 animate-spin text-[#C8A45D]" />
+      <p className="text-sm">Loading…</p>
+    </div>
+  );
+}
 
 export default function App() {
   const pathname = usePathname();
@@ -157,37 +166,47 @@ export default function App() {
           />
         )}
 
-        {/* ==================== PRODUCT DETAILS ==================== */}
+        {/* ==================== PRODUCT DETAILS (Nexus-style dynamic slug) ==================== */}
         {currentTab === 'product' && productSlug && (
-          <ProductDetailsPage
-            slug={productSlug}
-            onShowNotification={showNotification}
-          />
+          <Suspense fallback={<PageLoader />}>
+            <ProductDetailsPage
+              slug={productSlug}
+              onShowNotification={showNotification}
+            />
+          </Suspense>
         )}
 
         {/* ==================== SHOP VIEW (BUY GOLD) ==================== */}
         {currentTab === 'buy' && (
-          <ShopView
-            wishlist={watchlist}
-            toggleWishlist={handleWatchLot}
-            searchQuery={searchQuery}
-            onShowNotification={showNotification}
-          />
+          <Suspense fallback={<PageLoader />}>
+            <ShopView
+              wishlist={watchlist}
+              toggleWishlist={handleWatchLot}
+              searchQuery={searchQuery}
+              onShowNotification={showNotification}
+            />
+          </Suspense>
         )}
 
         {/* ==================== CART ==================== */}
-        {currentTab === 'cart' && <CartPage />}
+        {currentTab === 'cart' && (
+          <Suspense fallback={<PageLoader />}>
+            <CartPage />
+          </Suspense>
+        )}
 
         {/* ==================== CHECKOUT ==================== */}
         {currentTab === 'checkout' && (
-          <CheckoutPage
-            isLoggedIn={isLoggedIn}
-            openAuth={() => executeAuthOpen('signin')}
-            onShowNotification={showNotification}
-            onOrderComplete={(orderItems) => {
-              setOrders((prev) => [...prev, ...orderItems]);
-            }}
-          />
+          <Suspense fallback={<PageLoader />}>
+            <CheckoutPage
+              isLoggedIn={isLoggedIn}
+              openAuth={() => executeAuthOpen('signin')}
+              onShowNotification={showNotification}
+              onOrderComplete={(orderItems) => {
+                setOrders((prev) => [...prev, ...orderItems]);
+              }}
+            />
+          </Suspense>
         )}
 
         {/* ==================== SELL GOLD TAB ==================== */}

@@ -1,4 +1,4 @@
-/** Raw product shape returned by POST /prod (oneauto BFF). */
+/** Raw product shape returned by POST /prod (oneauto BFF / Nexus). */
 export interface ApiProductImage {
   url?: string;
   thumb?: string;
@@ -18,7 +18,9 @@ export interface ApiProduct {
   slug?: string;
   brand?: string;
   quantity?: number;
+  stockQty?: number;
   outofstock?: boolean | string;
+  category?: string | string[];
   attributes?: Record<string, unknown> | null;
   images?: Array<ApiProductImage | string> | null;
   specifications?: Record<string, unknown> | null;

@@ -5,6 +5,7 @@ import type {
   ProductSearchParams,
   ProductSearchResult,
 } from '@/types/apiProduct';
+import { toApiCategory } from '@/utils/mapProduct';
 
 /**
  * Catalog search — same contract as Nexus `ProductSearch`:
@@ -28,7 +29,7 @@ export async function productSearch(
     customFilters = [],
   } = params;
 
-  const filters: ProductSearchParams['customFilters'] = [];
+  const filters: NonNullable<ProductSearchParams['customFilters']> = [];
 
   if (osku) {
     filters.push({
@@ -48,16 +49,17 @@ export async function productSearch(
     });
   }
 
-  if (category && category !== 'all') {
+  const apiCategory = toApiCategory(String(category || ''));
+  if (apiCategory) {
     filters.push({
       name: 'attributes.category',
       type: 'list',
       filtertype: 'Equals',
-      value: [category],
+      value: [apiCategory],
     });
   }
 
-  if (minPrice && String(minPrice) !== '0') {
+  if (minPrice !== '' && minPrice != null && String(minPrice) !== '0') {
     filters.push({
       name: 'price',
       type: 'number',
@@ -66,7 +68,7 @@ export async function productSearch(
     });
   }
 
-  if (maxPrice && String(maxPrice) !== '10000') {
+  if (maxPrice !== '' && maxPrice != null && String(maxPrice) !== '10000') {
     filters.push({
       name: 'price',
       type: 'number',
@@ -139,24 +141,64 @@ export async function productSearch(
   }
 }
 
-/** Fetch a single product by URL slug (and optional osku). */
+function oskuCandidates(slug: string, sku?: string): string[] {
+  const values = [sku, slug, slug.toUpperCase(), slug.toLowerCase()]
+    .filter(Boolean)
+    .map((v) => String(v).trim());
+  // gold-01 → GOLD-01
+  if (slug.includes('-')) {
+    values.push(slug.toUpperCase());
+  }
+  return [...new Set(values.filter(Boolean))];
+}
+
+/**
+ * Fetch a single product — mirrors Nexus productdetails/[slug]:
+ * try attributes.slug, then osku (Nexus catalog uses osku like GOLD-01).
+ */
 export async function getProductBySlug(
   slug: string,
   options: { sku?: string; token?: string | null } = {},
 ): Promise<ApiProduct | null> {
-  if (!slug) return null;
+  if (!slug && !options.sku) return null;
 
-  const result = await productSearch(
-    {
-      slug,
-      osku: options.sku || '',
-      limit: 1,
-      page: 0,
-      showcount: false,
-    },
-    options.token,
-  );
+  const token = options.token;
 
-  if (result.error || !result.productsList.length) return null;
-  return result.productsList[0];
+  if (slug && slug !== 'product') {
+    const bySlug = await productSearch(
+      { slug, limit: 1, page: 0, showcount: false },
+      token,
+    );
+    if (!bySlug.error && bySlug.productsList.length) {
+      return bySlug.productsList[0];
+    }
+  }
+
+  for (const candidate of oskuCandidates(slug || '', options.sku)) {
+    const byOsku = await productSearch(
+      { osku: candidate, limit: 1, page: 0, showcount: false },
+      token,
+    );
+    if (!byOsku.error && byOsku.productsList.length) {
+      return byOsku.productsList[0];
+    }
+  }
+
+  // Last resort: text search (Nexus-style browse fallback)
+  if (slug && slug !== 'product') {
+    const byText = await productSearch(
+      { text: slug.replace(/-/g, ' '), limit: 5, page: 0, showcount: false },
+      token,
+    );
+    if (!byText.error && byText.productsList.length) {
+      const exact = byText.productsList.find(
+        (p) =>
+          String(p.osku || '').toLowerCase() === slug.toLowerCase() ||
+          String(p.sku || '').toLowerCase() === slug.toLowerCase(),
+      );
+      return exact || byText.productsList[0];
+    }
+  }
+
+  return null;
 }
