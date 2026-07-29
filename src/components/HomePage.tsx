@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import {
   ArrowRight, Play, Check, X, Shield, Lock, Fingerprint, Server,
-  Eye, FileCheck, Gavel, HandCoins, Warehouse,
-  Truck, Scale, Sparkles, ChevronRight, CircleDollarSign,
-  BadgeCheck, Clock, ShieldCheck
+  Eye, Gavel, HandCoins, Truck, Scale, ChevronRight, BadgeCheck, Clock, ShieldCheck,
+  Banknote, Landmark, Microscope, Gem, type LucideIcon,
 } from 'lucide-react';
 import { DEMO_SPOT_PRICE_OUNCE, DEMO_SPOT_PRICE_GRAM, INITIAL_LOTS, IMAGES, GOLD_PRICE_HISTORY_30D } from '../data/mockData';
 
@@ -11,6 +10,22 @@ interface HomePageProps {
   setCurrentTab: (tab: string) => void;
   setActiveWorkflow: (type: 'sell' | 'pawn' | 'appraisal' | null) => void;
   openAuth: (type: 'signin' | 'register') => void;
+}
+
+function FeatureIcon({ icon: Icon }: { icon: LucideIcon }) {
+  return (
+    <div className="relative shrink-0">
+      <div className="absolute -inset-2 rounded-[22px] bg-[#C8A45D]/15 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative w-[56px] h-[56px]">
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#E3C27A]/25 via-[#C8A45D]/10 to-transparent" />
+        <div className="absolute inset-[1px] rounded-2xl bg-[#0C0E12] border border-[#C8A45D]/25 group-hover:border-[#C8A45D]/50 transition-colors duration-300" />
+        <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_25%,rgba(227,194,122,0.22),transparent_55%)]" />
+        <div className="relative h-full w-full flex items-center justify-center">
+          <Icon className="w-[22px] h-[22px] text-[#E3C27A]" strokeWidth={1.6} />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }: HomePageProps) {
@@ -45,16 +60,22 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
   }
   const fillD = `${pathD} L ${coords[coords.length - 1].x} ${chartH} L ${coords[0].x} ${chartH} Z`;
 
-  const features = [
-    { icon: CircleDollarSign, title: 'Instant Liquidity', desc: 'Convert physical gold to cash in hours with live spot-linked offers and insured settlement.' },
-    { icon: Warehouse, title: 'Safe Storage', desc: 'Bank-grade vault custody with full insurance coverage and real-time inventory visibility.' },
-    { icon: Truck, title: 'Global Shipping', desc: 'Armored, insured logistics for bullion and jewelry with tracked end-to-end delivery.' },
-    { icon: Gavel, title: 'Live Auctions', desc: 'Bid on certified lots — estate jewelry, watches, and investment-grade gold bars.' },
-    { icon: HandCoins, title: 'Gold-Backed Loans', desc: 'Unlock capital against your gold without selling. Keep ownership while your asset is secured.' },
-    { icon: Scale, title: 'Transparent Pricing', desc: 'See melt value, fees, and final payout before you commit — no hidden deductions.' },
-    { icon: BadgeCheck, title: 'Verified Assaying', desc: 'XRF spectroscopy and certified metallurgy labs confirm purity before every payout.' },
-    { icon: Sparkles, title: 'Custom Jewelry', desc: 'Design, restore, or remake heirlooms with CAD modeling and matching-purity craftsmanship.' },
-    { icon: FileCheck, title: 'Full Compliance', desc: 'AML-ready identity checks and audit trails on every transaction through OneChannelAdmin.' },
+  const features: Array<{
+    icon: LucideIcon;
+    title: string;
+    desc: string;
+    tag: string;
+    tab: string;
+  }> = [
+    { icon: Banknote, title: 'Instant Liquidity', desc: 'Convert physical gold to cash in hours with live spot-linked offers and insured settlement.', tag: 'Sell', tab: 'sell' },
+    { icon: Landmark, title: 'Safe Storage', desc: 'Bank-grade vault custody with full insurance coverage and real-time inventory visibility.', tag: 'Custody', tab: 'wholesale' },
+    { icon: Truck, title: 'Global Shipping', desc: 'Armored, insured logistics for bullion and jewelry with tracked end-to-end delivery.', tag: 'Logistics', tab: 'about' },
+    { icon: Gavel, title: 'Live Auctions', desc: 'Bid on certified lots — estate jewelry, watches, and investment-grade gold bars.', tag: 'Auction', tab: 'auctions' },
+    { icon: HandCoins, title: 'Gold-Backed Loans', desc: 'Unlock capital against your gold without selling. Keep ownership while your asset is secured.', tag: 'Loans', tab: 'pawn' },
+    { icon: Scale, title: 'Transparent Pricing', desc: 'See melt value, fees, and final payout before you commit — no hidden deductions.', tag: 'Pricing', tab: 'prices' },
+    { icon: Microscope, title: 'Verified Assaying', desc: 'XRF spectroscopy and certified metallurgy labs confirm purity before every payout.', tag: 'Assay', tab: 'about' },
+    { icon: Gem, title: 'Custom Jewelry', desc: 'Design, restore, or remake heirlooms with CAD modeling and matching-purity craftsmanship.', tag: 'Craft', tab: 'about' },
+    { icon: ShieldCheck, title: 'Full Compliance', desc: 'AML-ready identity checks and audit trails on every transaction through OneChannelAdmin.', tag: 'Compliance', tab: 'portal' },
   ];
 
   const auctions = INITIAL_LOTS.slice(0, 3);
@@ -88,12 +109,12 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
   return (
     <div className="animate-fade-in">
       {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24">
+      <section className="relative overflow-hidden pt-6 pb-10 md:pt-10 md:pb-14">
         <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-[#C8A45D]/[0.07] rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-[#C8A45D]/[0.04] rounded-full blur-[100px] pointer-events-none" />
 
         <div className="max-w-[1500px] mx-auto px-5 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
             <div className="space-y-7">
               <h1 className="font-serif text-[40px] sm:text-[52px] lg:text-[58px] leading-[1.08] tracking-tight text-white font-medium">
                 Buy, Sell, Pawn, and Auction{' '}
@@ -160,7 +181,7 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
           </div>
 
           {/* Partner strip */}
-          <div className="mt-16 md:mt-20 pt-10 border-t border-white/[0.06]">
+          <div className="mt-10 md:mt-12 pt-6 border-t border-white/[0.06]">
             <p className="text-center text-sm uppercase tracking-[0.2em] text-[#6B7280] mb-6">
               Trusted by industry leaders
             </p>
@@ -176,8 +197,8 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== GOLD PRICES ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="max-w-2xl">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Live Market</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -302,44 +323,76 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== FEATURES ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Platform</p>
-            <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
-              Every Gold Transaction. One Platform.
-            </h2>
-            <p className="text-[15px] text-[#9CA3AF]">
-              From bullion to jewelry, loans to auctions — everything runs on a single secure ledger.
-            </p>
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div className="max-w-2xl space-y-3">
+              <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Platform</p>
+              <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
+                Every Gold Transaction. One Platform.
+              </h2>
+              <p className="text-[15px] text-[#9CA3AF] leading-relaxed">
+                From bullion to jewelry, loans to auctions — everything runs on a single secure ledger.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentTab('about')}
+              className="inline-flex items-center gap-2 self-start lg:self-auto px-5 py-2.5 rounded-full border border-white/10 text-[13px] font-medium text-[#E3C27A] hover:border-[#C8A45D]/40 hover:bg-[#C8A45D]/10 transition-all cursor-pointer"
+            >
+              Explore capabilities
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((f) => (
-              <div
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+            {features.map((f, index) => (
+              <button
                 key={f.title}
-                className="group bg-[#111111] border border-white/[0.08] hover:border-[#C8A45D]/30 rounded-2xl p-6 transition-all duration-300"
+                type="button"
+                onClick={() => setCurrentTab(f.tab)}
+                className="group relative text-left overflow-hidden rounded-2xl border border-white/[0.08] bg-[#101217] hover:border-[#C8A45D]/35 transition-all duration-300 cursor-pointer p-6 min-h-[210px] flex flex-col"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#C8A45D]/10 flex items-center justify-center mb-4">
-                  <f.icon className="w-5 h-5 text-[#C8A45D]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(200,164,93,0.10),transparent_55%)] opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C8A45D]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div className="relative flex flex-col gap-5 flex-1">
+                  <FeatureIcon icon={f.icon} />
+
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <div className="mb-2.5">
+                      <span className="text-[11px] uppercase tracking-[0.16em] font-semibold text-[#C8A45D]/90 bg-[#C8A45D]/10 border border-[#C8A45D]/20 px-2 py-0.5 rounded-full">
+                        {f.tag}
+                      </span>
+                    </div>
+
+                    <h3 className="text-[17px] font-semibold text-white tracking-tight mb-2">
+                      {f.title}
+                    </h3>
+                    <p className="text-[13px] text-[#9CA3AF] leading-relaxed">
+                      {f.desc}
+                    </p>
+
+                    <div className="mt-auto pt-5 flex items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#E3C27A]">
+                        Learn more
+                        <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </span>
+                      <span className="text-[12px] tabular-nums text-[#6B7280] font-medium">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-[16px] font-semibold text-white mb-2">{f.title}</h3>
-                <p className="text-[13px] leading-relaxed text-[#9CA3AF] mb-4">{f.desc}</p>
-                <button
-                  onClick={() => setCurrentTab('about')}
-                  className="inline-flex items-center gap-1 text-[13px] font-medium text-[#C8A45D] group-hover:gap-2 transition-all cursor-pointer"
-                >
-                  Learn more <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
       {/* ===== AUCTIONS ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Auctions</p>
@@ -403,9 +456,9 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== SELL TRANSPARENCY ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
         <div className="max-w-[1500px] mx-auto px-5 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
             <div className="space-y-6">
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Sell Gold</p>
               <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -483,9 +536,9 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== LOANS / PAWN ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
         <div className="max-w-[1500px] mx-auto px-5 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
             {/* Loan calculator */}
             <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-6 md:p-7 order-2 lg:order-1">
               <h3 className="text-[15px] font-semibold text-white mb-5">Loan Calculator</h3>
@@ -572,8 +625,8 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== INFRASTRUCTURE ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Infrastructure</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -638,8 +691,8 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== TRUST COMPARISON ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold">Trust</p>
             <h2 className="font-serif text-[32px] md:text-[40px] leading-tight text-white font-medium">
@@ -673,8 +726,8 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== SECURITY ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Security</p>
@@ -705,8 +758,8 @@ export default function HomePage({ setCurrentTab, setActiveWorkflow, openAuth }:
       </section>
 
       {/* ===== DASHBOARD PREVIEW ===== */}
-      <section className="py-16 md:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-10">
+      <section className="py-10 md:py-14 border-t border-white/[0.04]">
+        <div className="max-w-[1500px] mx-auto px-5 md:px-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[12px] uppercase tracking-[0.18em] text-[#C8A45D] font-semibold mb-3">Portal</p>
