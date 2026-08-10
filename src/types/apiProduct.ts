@@ -7,8 +7,9 @@ export interface ApiProductImage {
 }
 
 export interface ApiProduct {
-  osku?: string;
   sku?: string;
+  /** @deprecated Legacy alias; prefer sku */
+  osku?: string;
   mpn?: string;
   price?: number;
   compareAtPrice?: number | null;
@@ -31,6 +32,8 @@ export interface ProductSearchParams {
   page?: number;
   limit?: number;
   slug?: string;
+  sku?: string;
+  /** @deprecated Prefer sku */
   osku?: string;
   text?: string;
   category?: string;

@@ -205,10 +205,10 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
                     <p className="text-base font-mono text-[#E3C27A] font-bold">{product.certificateNumber}</p>
                   </div>
                 )}
-                {(product.osku || product.sku) && (
+                {(product.sku || product.osku) && (
                   <div>
                     <span className="text-[13px] uppercase tracking-wider text-[#AEB4C0]">SKU</span>
-                    <p className="text-base font-mono text-[#F7F4EC] font-bold">{product.osku || product.sku}</p>
+                    <p className="text-base font-mono text-[#F7F4EC] font-bold">{product.sku || product.osku}</p>
                   </div>
                 )}
                 <div>

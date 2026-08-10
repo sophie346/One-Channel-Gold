@@ -17,9 +17,10 @@ export interface Product {
   metalColor: 'Yellow Gold' | 'White Gold' | 'Rose Gold' | 'Multi-Tone';
   condition: 'Brand New' | 'Excellent' | 'Vintage' | 'Estate';
   size?: string;
-  /** API fields preserved for cart / deep links */
-  osku?: string;
+  /** API fields preserved for cart / deep links (sku; osku legacy fallback) */
   sku?: string;
+  /** @deprecated Prefer sku */
+  osku?: string;
   brand?: string;
   compareAtPrice?: number | null;
 }

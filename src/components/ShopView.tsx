@@ -156,8 +156,8 @@ export default function ShopView({
   }, [products, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy]);
 
   const openProduct = (product: Product) => {
-    const slug = product.slug || product.osku || product.id;
-    const sku = product.osku || product.sku || '';
+    const slug = product.slug || product.sku || product.osku || product.id;
+    const sku = product.sku || product.osku || '';
     const path = `/buy/${encodeURIComponent(slug)}${
       sku ? `?sku=${encodeURIComponent(sku)}` : ''
     }`;

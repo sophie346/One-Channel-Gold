@@ -19,6 +19,7 @@ export async function productSearch(
     page = 0,
     limit = 12,
     slug = '',
+    sku = '',
     osku = '',
     text = '',
     category = '',
@@ -31,12 +32,13 @@ export async function productSearch(
 
   const filters: NonNullable<ProductSearchParams['customFilters']> = [];
 
-  if (osku) {
+  const skuVal = sku || osku;
+  if (skuVal) {
     filters.push({
-      name: 'osku',
+      name: 'sku',
       type: 'string',
       filtertype: 'Equals',
-      value: osku,
+      value: skuVal,
     });
   }
 
@@ -141,7 +143,7 @@ export async function productSearch(
   }
 }
 
-function oskuCandidates(slug: string, sku?: string): string[] {
+function skuCandidates(slug: string, sku?: string): string[] {
   const values = [sku, slug, slug.toUpperCase(), slug.toLowerCase()]
     .filter(Boolean)
     .map((v) => String(v).trim());
@@ -154,7 +156,7 @@ function oskuCandidates(slug: string, sku?: string): string[] {
 
 /**
  * Fetch a single product — mirrors Nexus productdetails/[slug]:
- * try attributes.slug, then osku (Nexus catalog uses osku like GOLD-01).
+ * try attributes.slug, then sku (legacy osku still accepted by BFF remap).
  */
 export async function getProductBySlug(
   slug: string,
@@ -174,13 +176,13 @@ export async function getProductBySlug(
     }
   }
 
-  for (const candidate of oskuCandidates(slug || '', options.sku)) {
-    const byOsku = await productSearch(
-      { osku: candidate, limit: 1, page: 0, showcount: false },
+  for (const candidate of skuCandidates(slug || '', options.sku)) {
+    const bySku = await productSearch(
+      { sku: candidate, limit: 1, page: 0, showcount: false },
       token,
     );
-    if (!byOsku.error && byOsku.productsList.length) {
-      return byOsku.productsList[0];
+    if (!bySku.error && bySku.productsList.length) {
+      return bySku.productsList[0];
     }
   }
 
@@ -193,8 +195,7 @@ export async function getProductBySlug(
     if (!byText.error && byText.productsList.length) {
       const exact = byText.productsList.find(
         (p) =>
-          String(p.osku || '').toLowerCase() === slug.toLowerCase() ||
-          String(p.sku || '').toLowerCase() === slug.toLowerCase(),
+          String(p.sku || p.osku || '').toLowerCase() === slug.toLowerCase(),
       );
       return exact || byText.productsList[0];
     }

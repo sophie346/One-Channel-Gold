@@ -162,12 +162,13 @@ export function slugify(input: string): string {
 export function mapApiProductToProduct(api: ApiProduct): Product {
   const images = getProductImages(api);
   const title = String(
-    api.website_title || api.title || attr(api, 'title') || api.osku || 'Product',
+    api.website_title || api.title || attr(api, 'title') || api.sku || api.osku || 'Product',
   );
   const slugFromAttrs = attr(api, 'slug');
+  const sku = String(api.sku || api.osku || '').trim();
   const slug =
     String(api.slug || slugFromAttrs || '').trim() ||
-    slugify(String(api.osku || api.sku || title));
+    slugify(String(sku || title));
 
   const categoryRaw =
     api.category || attr(api, 'category', 'Category') || api.brand;
@@ -181,7 +182,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
   const weight = Number(weightRaw);
 
   return {
-    id: String(api.osku || api.sku || slug),
+    id: String(sku || slug),
     slug,
     name: title,
     category: normalizeCategory(categoryRaw),
@@ -209,8 +210,8 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     metalColor: normalizeMetalColor(colorRaw || title),
     condition: normalizeCondition(attr(api, 'condition', 'Condition')),
     size: String(attr(api, 'size', 'Size', 'length', 'width') || '') || undefined,
-    osku: api.osku,
-    sku: api.sku,
+    sku,
+    osku: sku || api.osku,
     brand: api.brand ? String(api.brand) : undefined,
     compareAtPrice:
       api.compareAtPrice != null ? Number(api.compareAtPrice) : null,
