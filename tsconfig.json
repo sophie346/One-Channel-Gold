@@ -15,7 +15,17 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@src/*": ["./src/*"],
+      "@SharedLibrary/utils/UserProfile": ["./src/adapters/UserProfile.ts"],
+      "@SharedLibrary/utils/Utils": ["./src/adapters/Utils.ts"],
+      "@SharedLibrary/Auth/loginfunctions": ["./src/adapters/loginfunctions.ts"],
+      "@src/utils/Constants": ["./src/adapters/Constants.ts"],
+      "@src/utils/commonService": ["./src/adapters/commonService.ts"],
+      "@src/utils/productservices": ["./src/adapters/productservices.ts"],
+      "@src/containers/Globalcontext": ["./src/adapters/Globalcontext.tsx"],
+      "primereact/toast": ["./src/shims/primereact/toast.tsx"],
+      "primereact/confirmdialog": ["./src/shims/primereact/confirmdialog.tsx"]
     },
     "baseUrl": "."
   },

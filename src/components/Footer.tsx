@@ -32,6 +32,18 @@ export default function Footer({ setCurrentTab, onShowNotification }: FooterProp
       ],
     },
     {
+      title: 'Customer Portal',
+      items: [
+        { label: 'Account Login', id: 'account' },
+        { label: 'Track Order', id: 'track-order' },
+        { label: 'Order History', id: 'my-orders' },
+        { label: 'Wishlist', id: 'wishlist' },
+        { label: 'Returned Orders', id: 'orders-returns' },
+        { label: 'Cancelled Orders', id: 'orders-cancelled' },
+        { label: 'Invoices', id: 'invoices' },
+      ],
+    },
+    {
       title: 'Resources',
       items: [
         { label: 'Help Center', id: 'resources' },
@@ -95,7 +107,7 @@ export default function Footer({ setCurrentTab, onShowNotification }: FooterProp
         </div>
 
         {/* Link columns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 py-14">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 py-14">
           {columns.map((col) => (
             <div key={col.title} className="space-y-4">
               <h4 className="text-[13px] font-semibold text-white">{col.title}</h4>

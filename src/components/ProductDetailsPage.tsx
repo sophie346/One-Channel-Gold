@@ -6,7 +6,7 @@ import {
   ArrowLeft, ShoppingCart, ShieldCheck, Truck, BadgeCheck, Check, Loader2
 } from 'lucide-react';
 import { useAppDispatch } from '@/store/hooks';
-import { addToCart } from '@/store/cartSlice';
+import { addProductToCart } from '@/store/cartSlice';
 import { getProductBySlug } from '@/services/productService';
 import { mapApiProductToProduct, getProductImages } from '@/utils/mapProduct';
 import type { Product } from '@/types';
@@ -88,14 +88,22 @@ export default function ProductDetailsPage({ slug, onShowNotification }: Product
     );
   }
 
-  const handleAddToCart = () => {
-    dispatch(addToCart(product));
-    onShowNotification?.(`${product.name} added to cart.`, 'success');
+  const handleAddToCart = async () => {
+    const result = await dispatch(addProductToCart({ product, quantity: 1 }));
+    if (addProductToCart.fulfilled.match(result)) {
+      onShowNotification?.(`${product.name} added to cart.`, 'success');
+    } else {
+      onShowNotification?.(String(result.payload || 'Could not add to cart.'), 'error');
+    }
   };
 
-  const handleBuyNow = () => {
-    dispatch(addToCart(product));
-    router.push('/checkout');
+  const handleBuyNow = async () => {
+    const result = await dispatch(addProductToCart({ product, quantity: 1 }));
+    if (addProductToCart.fulfilled.match(result)) {
+      router.push('/checkout');
+    } else {
+      onShowNotification?.(String(result.payload || 'Could not add to cart.'), 'error');
+    }
   };
 
   const mainImage = gallery[activeImage] || product.image;

@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Menu, X, Search, TrendingUp, TrendingDown, ShoppingBag } from 'lucide-react';
+import {
+  Menu, X, Search, TrendingUp, TrendingDown, ShoppingBag, Heart, ChevronDown,
+  User, Package, MapPin, FileText, Truck, KeyRound, Shield,
+} from 'lucide-react';
 import { DEMO_SPOT_PRICE_OUNCE } from '../data/mockData';
 
 interface NavigationProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
-  openAuth: (type: 'signin' | 'register') => void;
+  openAuth: (type: 'signin' | 'register' | 'forgot') => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   userSession: any;
@@ -46,6 +49,7 @@ export default function Navigation({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [spot, setSpot] = useState<SpotTicker>({
     price: DEMO_SPOT_PRICE_OUNCE,
     changePercent: null,
@@ -107,7 +111,25 @@ export default function Navigation({
   const handleNavClick = (tabId: string) => {
     setCurrentTab(tabId);
     setMobileMenuOpen(false);
+    setAccountOpen(false);
   };
+
+  const accountLinks = userSession.isLoggedIn
+    ? [
+        { label: 'Account Information', id: 'account', icon: User },
+        { label: 'Sign-in & Security', id: 'account-security', icon: Shield },
+        { label: 'Order History', id: 'my-orders', icon: Package },
+        { label: 'Invoices', id: 'invoices', icon: FileText },
+        { label: 'Wishlist', id: 'wishlist', icon: Heart },
+        { label: 'Addresses', id: 'addresses', icon: MapPin },
+        { label: 'Returned Orders', id: 'orders-returns', icon: Package },
+        { label: 'Cancelled Orders', id: 'orders-cancelled', icon: Package },
+        { label: 'Vault Portal', id: 'portal', icon: User },
+      ]
+    : [
+        { label: 'Track Order', id: 'track-order', icon: Truck },
+        { label: 'Wishlist', id: 'wishlist', icon: Heart },
+      ];
 
   return (
     <>
@@ -188,6 +210,14 @@ export default function Navigation({
               <Search className="w-[18px] h-[18px]" strokeWidth={1.75} />
             </button>
 
+            <button
+              onClick={() => handleNavClick('wishlist')}
+              className="hidden sm:inline-flex p-1.5 text-[#D1D5DB] hover:text-white transition-colors cursor-pointer"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            </button>
+
             {/* Cart */}
             <button
               onClick={openCart}
@@ -202,22 +232,68 @@ export default function Navigation({
               )}
             </button>
 
-            {/* Sign In */}
-            {userSession.isLoggedIn ? (
-              <button
-                onClick={() => handleNavClick('portal')}
-                className="hidden sm:inline-flex text-[14px] font-medium text-white hover:text-[#C5A059] transition-colors cursor-pointer"
-              >
-                {userSession.name?.split(' ')[0] || 'Account'}
-              </button>
-            ) : (
-              <button
-                onClick={() => openAuth('signin')}
-                className="hidden sm:inline-flex text-[14px] font-medium text-white hover:text-[#C5A059] transition-colors cursor-pointer"
-              >
-                Sign In
-              </button>
-            )}
+            <div className="relative hidden sm:block">
+              {userSession.isLoggedIn ? (
+                <button
+                  onClick={() => setAccountOpen((v) => !v)}
+                  className="inline-flex items-center gap-1 text-[14px] font-medium text-white hover:text-[#C5A059] transition-colors cursor-pointer"
+                >
+                  {userSession.name?.split(' ')[0] || 'Account'}
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setAccountOpen((v) => !v)}
+                  className="inline-flex items-center gap-1 text-[14px] font-medium text-white hover:text-[#C5A059] transition-colors cursor-pointer"
+                >
+                  Account
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {accountOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#171A21] border border-white/10 rounded-xl shadow-2xl py-2 z-50">
+                  {accountLinks.map((link) => (
+                    <button
+                      key={link.id}
+                      type="button"
+                      onClick={() => handleNavClick(link.id)}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-[#AEB4C0] hover:bg-white/5 hover:text-white cursor-pointer"
+                    >
+                      <link.icon className="w-3.5 h-3.5" />
+                      {link.label}
+                    </button>
+                  ))}
+                  <div className="border-t border-white/10 mt-1 pt-1">
+                    {userSession.isLoggedIn ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => { setAccountOpen(false); openAuth('forgot'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-[#AEB4C0] hover:bg-white/5 cursor-pointer"
+                        >
+                          <KeyRound className="w-3.5 h-3.5" /> Reset password
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setAccountOpen(false); logOut(); }}
+                          className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/5 cursor-pointer"
+                        >
+                          Sign out
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { setAccountOpen(false); openAuth('signin'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-[#C8A45D] font-bold hover:bg-white/5 cursor-pointer"
+                      >
+                        Sign In
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Sell Your Gold — pill button */}
             <button
@@ -305,6 +381,20 @@ export default function Navigation({
               </button>
             ))}
           </nav>
+
+          <div className="flex flex-col gap-1 mb-6 border-t border-white/10 pt-4">
+            <p className="px-4 pb-2 text-[11px] uppercase tracking-widest text-[#6B7280] font-bold">Account</p>
+            {accountLinks.map((link) => (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => handleNavClick(link.id)}
+                className="py-3 px-4 text-left text-[14px] text-[#D1D5DB] hover:text-white cursor-pointer"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
 
           <div className="flex flex-col gap-3 pb-10">
             {userSession.isLoggedIn ? (

@@ -21,7 +21,8 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'onegold',
   storage,
-  whitelist: ['cart'],
+  // Server BFF cart is source of truth (guestCartId + localStorage.cart)
+  whitelist: [] as string[],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

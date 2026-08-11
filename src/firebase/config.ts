@@ -2,13 +2,13 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyBN6JBQ7OXwXNWC3EkZxC2et0CMTd91IEA',
-  authDomain: 'onetruckpartscom.firebaseapp.com',
-  projectId: 'onetruckpartscom',
-  storageBucket: 'onetruckpartscom.appspot.com',
-  messagingSenderId: '200627911533',
-  appId: '1:200627911533:web:f8ef05ccbb3e10426bf864',
-  measurementId: 'G-NSE0V4RM8P',
+  apiKey: "AIzaSyDqG6-Do0OIlKkZMhqA1NBVqAyKuVBHkZY",
+  authDomain: "one-gold-89f59.firebaseapp.com",
+  projectId: "one-gold-89f59",
+  storageBucket: "one-gold-89f59.firebasestorage.app",
+  messagingSenderId: "821643614436",
+  appId: "1:821643614436:web:c3763db29bd88bd2c234f1",
+  measurementId: "G-4HKZ2M27N1"
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { Suspense, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowRight, HandCoins, Calendar, Info, CheckCircle2, X, ShieldAlert, Loader2
 } from 'lucide-react';
@@ -15,15 +15,24 @@ import ShopView from '@/components/ShopView';
 import ProductDetailsPage from '@/components/ProductDetailsPage';
 import CartPage from '@/components/CartPage';
 import CheckoutPage from '@/components/CheckoutPage';
+import OrderSuccessPage from '@/components/OrderSuccessPage';
+import ResetPasswordPage from '@/components/ResetPasswordPage';
 import AuctionsView from '@/components/AuctionsView';
 import ServicesView from '@/components/ServicesView';
 import WorkflowsView from '@/components/WorkflowsView';
 import WholesaleAndStorage from '@/components/WholesaleAndStorage';
 import StaticPages from '@/components/StaticPages';
 import PortalDashboard from '@/components/PortalDashboard';
+import AccountInfoPage from '@/components/account/AccountInfoPage';
+import AccountSecurityPage from '@/components/account/AccountSecurityPage';
+import AddressesPage from '@/components/account/AddressesPage';
+import { OrderDetailPage, OrdersListPage } from '@/components/account/OrdersPages';
+import TrackOrderPage from '@/components/account/TrackOrderPage';
+import WishlistPage from '@/components/account/WishlistPage';
+import InvoicesListPage from '@/components/account/InvoicesListPage';
 import { INITIAL_PAWN_LOANS } from '@/data/mockData';
 import { PawnLoan, SellGoldOffer } from '@/types';
-import { pathToTab, tabToPath, getProductSlug } from '@/routes';
+import { AUTH_REQUIRED_TABS, getOrderId, getProductSlug, pathToTab, tabToPath } from '@/routes';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutUser, clearAuthError } from '@/store/authSlice';
 import { selectCartCount, selectCartItems } from '@/store/cartSlice';
@@ -40,9 +49,11 @@ function PageLoader() {
 export default function App() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const currentTab = pathToTab(pathname || '/');
   const productSlug = getProductSlug(pathname || '/');
+  const orderId = getOrderId(pathname || '/');
   const cartCount = useAppSelector(selectCartCount);
   const cartItems = useAppSelector(selectCartItems);
 
@@ -55,14 +66,14 @@ export default function App() {
   const [activeWorkflow, setActiveWorkflow] = useState<'sell' | 'pawn' | 'appraisal' | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
 
-  const { user, isLoggedIn } = useAppSelector((state) => state.auth);
+  const { user, isLoggedIn, initialized } = useAppSelector((state) => state.auth);
   const userSession = {
     isLoggedIn,
-    name: user?.name || '',
-    email: user?.email || '',
-    uid: user?.uid || '',
+    name: user?.name || user?.displayName || '',
+    email: user?.email || user?.emailId || '',
+    uid: user?.uid || user?.userId || '',
   };
-  const [authModal, setAuthModal] = useState<'signin' | 'register' | null>(null);
+  const [authModal, setAuthModal] = useState<'signin' | 'register' | 'forgot' | null>(null);
 
   // Business Domain State lists
   const [pawnLoans, setPawnLoans] = useState<PawnLoan[]>(INITIAL_PAWN_LOANS);
@@ -127,7 +138,33 @@ export default function App() {
     }
   };
 
-  const executeAuthOpen = (type: 'signin' | 'register') => {
+  useEffect(() => {
+    const mode = searchParams?.get('mode');
+    const oobCode = searchParams?.get('oobCode') || searchParams?.get('oobcode');
+    if (mode === 'resetPassword' && oobCode && pathname !== '/reset-password') {
+      router.replace(`/reset-password?oobCode=${encodeURIComponent(oobCode)}`);
+    }
+  }, [pathname, router, searchParams]);
+
+  useEffect(() => {
+    if (currentTab === 'login') {
+      if (isLoggedIn) {
+        router.replace('/');
+        return;
+      }
+      setAuthModal('signin');
+      return;
+    }
+    if (currentTab === 'forgot-password') {
+      setAuthModal('forgot');
+      return;
+    }
+    if (AUTH_REQUIRED_TABS.has(currentTab) && initialized && !isLoggedIn) {
+      setAuthModal('signin');
+    }
+  }, [currentTab, isLoggedIn, initialized, router]);
+
+  const executeAuthOpen = (type: 'signin' | 'register' | 'forgot') => {
     dispatch(clearAuthError());
     setAuthModal(type);
   };
@@ -137,6 +174,31 @@ export default function App() {
     setCurrentTab('home');
     showNotification('Successfully logged out from OneGold.', 'info');
   };
+
+  if (currentTab === 'checkout') {
+    return (
+      <CheckoutPage
+        isLoggedIn={isLoggedIn}
+        openAuth={() => executeAuthOpen('signin')}
+        onShowNotification={showNotification}
+        onOrderComplete={(orderItems) => {
+          setOrders((prev) => [...prev, ...orderItems]);
+        }}
+      />
+    );
+  }
+
+  if (currentTab === 'order-success') {
+    return <OrderSuccessPage />;
+  }
+
+  if (currentTab === 'reset-password') {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <ResetPasswordPage />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="bg-[#0A0A0A] min-h-screen text-[#9CA3AF] selection:bg-[#C8A45D]/30 selection:text-[#E3C27A]">
@@ -192,20 +254,6 @@ export default function App() {
         {currentTab === 'cart' && (
           <Suspense fallback={<PageLoader />}>
             <CartPage />
-          </Suspense>
-        )}
-
-        {/* ==================== CHECKOUT ==================== */}
-        {currentTab === 'checkout' && (
-          <Suspense fallback={<PageLoader />}>
-            <CheckoutPage
-              isLoggedIn={isLoggedIn}
-              openAuth={() => executeAuthOpen('signin')}
-              onShowNotification={showNotification}
-              onOrderComplete={(orderItems) => {
-                setOrders((prev) => [...prev, ...orderItems]);
-              }}
-            />
           </Suspense>
         )}
 
@@ -353,8 +401,49 @@ export default function App() {
           <StaticPages pageType={currentTab as any} />
         )}
 
+        {currentTab === 'account' && isLoggedIn && (
+          <AccountInfoPage onNotify={showNotification} />
+        )}
+        {currentTab === 'account-security' && isLoggedIn && (
+          <AccountSecurityPage onNotify={showNotification} />
+        )}
+        {currentTab === 'addresses' && isLoggedIn && (
+          <AddressesPage onNotify={showNotification} />
+        )}
+        {currentTab === 'my-orders' && isLoggedIn && (
+          <OrdersListPage variant="all" onNotify={showNotification} />
+        )}
+        {currentTab === 'orders-returns' && isLoggedIn && (
+          <OrdersListPage variant="returns" onNotify={showNotification} />
+        )}
+        {currentTab === 'orders-cancelled' && isLoggedIn && (
+          <OrdersListPage variant="cancelled" onNotify={showNotification} />
+        )}
+        {currentTab === 'order-detail' && isLoggedIn && orderId && (
+          <OrderDetailPage orderId={orderId} onNotify={showNotification} />
+        )}
+        {currentTab === 'track-order' && <TrackOrderPage />}
+        {currentTab === 'wishlist' && (
+          <WishlistPage onNotify={showNotification} openAuth={() => executeAuthOpen('signin')} />
+        )}
+        {currentTab === 'invoices' && isLoggedIn && <InvoicesListPage />}
+
+        {AUTH_REQUIRED_TABS.has(currentTab) && initialized && !isLoggedIn && currentTab !== 'portal' && (
+          <div className="max-w-lg mx-auto px-5 py-20 text-center space-y-4">
+            <h2 className="text-2xl font-black text-[#F7F4EC] uppercase">Sign in required</h2>
+            <p className="text-sm text-[#AEB4C0]">Log in to view this page.</p>
+            <button
+              type="button"
+              onClick={() => executeAuthOpen('signin')}
+              className="px-6 py-3 bg-[#C8A45D] text-black font-bold rounded-lg cursor-pointer"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+
         {/* ==================== CUSTOMER PORTAL TAB ==================== */}
-        {currentTab === 'portal' && (
+        {currentTab === 'portal' && isLoggedIn && (
           <PortalDashboard
             userSession={userSession}
             cart={cartItems}
@@ -367,6 +456,19 @@ export default function App() {
             appraisalBookings={appraisalBookings}
             onShowNotification={showNotification}
           />
+        )}
+        {currentTab === 'portal' && initialized && !isLoggedIn && (
+          <div className="max-w-lg mx-auto px-5 py-20 text-center space-y-4">
+            <h2 className="text-2xl font-black text-[#F7F4EC] uppercase">Sign in required</h2>
+            <p className="text-sm text-[#AEB4C0]">Log in to view your vault portal, orders, and account details.</p>
+            <button
+              type="button"
+              onClick={() => executeAuthOpen('signin')}
+              className="px-6 py-3 bg-[#C8A45D] text-black font-bold rounded-lg cursor-pointer"
+            >
+              Sign In
+            </button>
+          </div>
         )}
 
       </main>
@@ -391,6 +493,9 @@ export default function App() {
           onClose={() => {
             dispatch(clearAuthError());
             setAuthModal(null);
+            if (currentTab === 'login' || currentTab === 'forgot-password') {
+              router.replace('/');
+            }
           }}
           onSwitchMode={(mode) => {
             dispatch(clearAuthError());

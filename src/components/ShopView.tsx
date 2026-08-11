@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2 } from 'lucide-react';
 import { Product } from '../types';
 import { useAppDispatch } from '@/store/hooks';
-import { addToCart } from '@/store/cartSlice';
+import { addProductToCart } from '@/store/cartSlice';
 import { productSearch } from '@/services/productService';
 import { mapApiProductToProduct } from '@/utils/mapProduct';
 
@@ -164,9 +164,13 @@ export default function ShopView({
     router.push(path);
   };
 
-  const handleAddToCart = (product: Product) => {
-    dispatch(addToCart(product));
-    onShowNotification?.(`${product.name} added to cart.`, 'success');
+  const handleAddToCart = async (product: Product) => {
+    const result = await dispatch(addProductToCart({ product, quantity: 1 }));
+    if (addProductToCart.fulfilled.match(result)) {
+      onShowNotification?.(`${product.name} added to cart.`, 'success');
+    } else {
+      onShowNotification?.(String(result.payload || 'Could not add to cart.'), 'error');
+    }
   };
 
   const clearFilters = () => {

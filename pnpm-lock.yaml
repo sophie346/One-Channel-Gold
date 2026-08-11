@@ -14,6 +14,9 @@ importers:
       firebase:
         specifier: ^12.16.0
         version: 12.16.0
+      jwt-decode:
+        specifier: ^4.0.0
+        version: 4.0.0
       lucide-react:
         specifier: ^0.546.0
         version: 0.546.0(react@19.2.8)
@@ -32,6 +35,9 @@ importers:
       react-redux:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.17)(react@19.2.8)(redux@5.0.1)
+      react-square-web-payments-sdk:
+        specifier: ^3.3.0
+        version: 3.3.0(react@19.2.8)
       redux-persist:
         specifier: ^6.0.0
         version: 6.0.0(react@19.2.8)(redux@5.0.1)
@@ -531,11 +537,22 @@ packages:
       react-redux:
         optional: true
 
+  '@square/web-payments-sdk-types@1.84.0':
+    resolution: {integrity: sha512-WtJa1fnmlqYaFlXGAWVh6WM688CUqposhD/lIoKG7XteZQjA8db5D2Gg+48DkyITRhoZrpFCLvPhDSj15UmThg==}
+
+  '@square/web-sdk@2.2.0':
+    resolution: {integrity: sha512-CcqnbSwvvTTdKWTipq6LGUcai3uhjKLA7sMmct+dDVw3TdRoR2oOKIlDZlvzFOBG91Yrn+IUua3w8U3pZKg9DA==}
+
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+
+  '@stitches/react@1.2.8':
+    resolution: {integrity: sha512-9g9dWI4gsSVe8bNLlb+lMkBYsnIKCZTmvqvDG+Avnn69XfmHZKiaMrx7cgTaddq7aTPPmXiTsbFcUy0xgI4+wA==}
+    peerDependencies:
+      react: '>= 16.3.0'
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -753,6 +770,10 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
+  jwt-decode@4.0.0:
+    resolution: {integrity: sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==}
+    engines: {node: '>=18'}
+
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
     engines: {node: '>= 12.0.0'}
@@ -925,6 +946,11 @@ packages:
       redux:
         optional: true
 
+  react-square-web-payments-sdk@3.3.0:
+    resolution: {integrity: sha512-VtYMXHTajt+XQYInBW2j4vSNNlrPUNnft395snH6LjEKCrxSvmXjvjJHN1I8PgIjUpQ/prlR5YyREIaoO5l2TQ==}
+    peerDependencies:
+      react: ^16 || ^17 || ^18 || ^19
+
   react@19.2.8:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
     engines: {node: '>=0.10.0'}
@@ -1002,6 +1028,11 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  typescript@5.1.6:
+    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+    engines: {node: '>=14.17'}
+    hasBin: true
 
   typescript@5.8.3:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
@@ -1565,9 +1596,21 @@ snapshots:
       react: 19.2.8
       react-redux: 9.3.0(@types/react@19.2.17)(react@19.2.8)(redux@5.0.1)
 
+  '@square/web-payments-sdk-types@1.84.0':
+    dependencies:
+      typescript: 5.1.6
+
+  '@square/web-sdk@2.2.0':
+    dependencies:
+      '@square/web-payments-sdk-types': 1.84.0
+
   '@standard-schema/spec@1.1.0': {}
 
   '@standard-schema/utils@0.3.0': {}
+
+  '@stitches/react@1.2.8(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
 
   '@swc/helpers@0.5.15':
     dependencies:
@@ -1774,6 +1817,8 @@ snapshots:
 
   jiti@2.7.0: {}
 
+  jwt-decode@4.0.0: {}
+
   lightningcss-android-arm64@1.32.0:
     optional: true
 
@@ -1922,6 +1967,12 @@ snapshots:
       '@types/react': 19.2.17
       redux: 5.0.1
 
+  react-square-web-payments-sdk@3.3.0(react@19.2.8):
+    dependencies:
+      '@square/web-sdk': 2.2.0
+      '@stitches/react': 1.2.8(react@19.2.8)
+      react: 19.2.8
+
   react@19.2.8: {}
 
   redux-persist@6.0.0(react@19.2.8)(redux@5.0.1):
@@ -2001,6 +2052,8 @@ snapshots:
   tapable@2.3.3: {}
 
   tslib@2.8.1: {}
+
+  typescript@5.1.6: {}
 
   typescript@5.8.3: {}
 

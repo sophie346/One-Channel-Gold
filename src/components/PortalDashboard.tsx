@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAppSelector } from '@/store/hooks';
+import { fetchOrders, flattenOrderItems } from '@/services/orderService';
 import {
   LayoutDashboard, ShoppingCart, TrendingUp, HandCoins, Gavel, Calendar, Hammer, RefreshCw, Lock,
   Receipt, FileText, Bell, Settings, UserCheck, ShieldAlert, CheckCircle2, ChevronRight, X, ArrowUpRight, DollarSign
@@ -38,6 +40,28 @@ export default function PortalDashboard({
   const [signedDocs, setSignedDocs] = useState<Record<string, boolean>>({});
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentTargetLoan, setPaymentTargetLoan] = useState<PawnLoan | null>(null);
+  const [apiOrders, setApiOrders] = useState<any[]>([]);
+  const token = useAppSelector((s) => s.auth.user?.token);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetchOrders(token);
+        if (!cancelled && !res?.error) {
+          setApiOrders(flattenOrderItems(res.orders || []));
+        }
+      } catch {
+        if (!cancelled) setApiOrders([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const displayOrders = apiOrders.length ? apiOrders : orders;
 
   // local active state records
   const [storageItems] = useState<StorageRecord[]>(INITIAL_STORAGE);
@@ -235,9 +259,9 @@ export default function PortalDashboard({
           {activeTab === 'orders' && (
             <div className="space-y-4 animate-fade-in">
               <h3 className="text-sm font-bold text-[#F7F4EC] uppercase">Your Purchased Bullion &amp; Jewelry</h3>
-              {orders.length > 0 ? (
+              {displayOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {orders.map((item, idx) => (
+                  {displayOrders.map((item, idx) => (
                     <div key={idx} className="p-4 bg-[#11141A] border border-white/5 rounded-lg flex justify-between items-center text-xs">
                       <div className="flex gap-3 items-center">
                         <img src={item.image} alt="product" referrerPolicy="no-referrer" className="w-10 h-10 object-cover rounded" />
@@ -247,7 +271,7 @@ export default function PortalDashboard({
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-black text-[#E3C27A]">${item.price.toLocaleString()}</p>
+                        <p className="font-black text-[#E3C27A]">${Number(item.price || 0).toLocaleString()}</p>
                         <span className="text-xs uppercase bg-[#2F9D70]/10 text-[#2F9D70] font-bold px-1.5 py-0.5 rounded mt-1 inline-block">
                           Insured Transit
                         </span>

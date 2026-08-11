@@ -1,23 +1,27 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  User,
-} from 'firebase/auth';
-import { auth } from '../firebase/config';
-
-export interface AuthUser {
-  uid: string;
-  email: string | null;
-  name: string;
-}
+  confirmResetPassword,
+  getSelectedCompanyId,
+  getStoredAuthUser,
+  getStoredCompanies,
+  loginWithEmail,
+  logout as logoutApi,
+  refreshAuthFromFirebase,
+  refreshUserDetailsFromApi,
+  registerWithEmail,
+  resetPassword,
+} from '@/services/authService';
+import { storage, STORAGE_KEYS } from '@/lib/storage';
+import type { AuthUser, B2BCompany } from '@/types/api';
+import type { RootState } from './index';
 
 interface AuthState {
   user: AuthUser | null;
   isLoggedIn: boolean;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  isB2b: boolean;
+  companies: B2BCompany[];
+  selectedCompanyId: string;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed' | 'authenticated';
   initialized: boolean;
   error: string | null;
 }
@@ -25,82 +29,110 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isLoggedIn: false,
+  isB2b: false,
+  companies: [],
+  selectedCompanyId: '',
   status: 'idle',
   initialized: false,
   error: null,
 };
 
-const mapUser = (user: User): AuthUser => ({
-  uid: user.uid,
-  email: user.email,
-  name: user.displayName || user.email?.split('@')[0] || 'Investor',
+function friendlyAuthError(e: unknown, fallback: string) {
+  const raw = e instanceof Error ? e.message : String(e || fallback);
+  if (/email-already-in-use|EMAIL_EXISTS|already.*exist/i.test(raw)) {
+    return 'This email is already registered. Please sign in instead.';
+  }
+  if (/wrong-password|invalid-credential|user-not-found/i.test(raw)) {
+    return 'Invalid email or password.';
+  }
+  if (/weak-password/i.test(raw)) {
+    return 'Password should be at least 6 characters.';
+  }
+  if (/expired-action-code|invalid-action-code/i.test(raw)) {
+    return 'This reset link is invalid or has expired. Please request a new one.';
+  }
+  if (/too-many-requests/i.test(raw)) {
+    return 'Too many attempts. Please try again later.';
+  }
+  return raw || fallback;
+}
+
+export const initAuth = createAsyncThunk('auth/init', async () => {
+  return refreshAuthFromFirebase();
 });
 
-const getErrorMessage = (error: unknown): string => {
-  const code = (error as { code?: string })?.code;
-  switch (code) {
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists.';
-    case 'auth/invalid-email':
-      return 'Please enter a valid email address.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters.';
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Invalid email or password.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please try again later.';
-    case 'auth/network-request-failed':
-      return 'Network error. Check your connection and try again.';
-    default:
-      return (error as { message?: string })?.message || 'Authentication failed.';
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+    try {
+      return await loginWithEmail(email, password);
+    } catch (e) {
+      return rejectWithValue(friendlyAuthError(e, 'Login failed'));
+    }
   }
-};
+);
 
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (
-    { name, email, password }: { name: string; email: string; password: string },
+    { email, password }: { name?: string; email: string; password: string },
     { rejectWithValue }
   ) => {
     try {
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(credential.user, { displayName: name });
-      return {
-        uid: credential.user.uid,
-        email: credential.user.email,
-        name: name.trim() || credential.user.email?.split('@')[0] || 'Investor',
-      };
-    } catch (error) {
-      return rejectWithValue(getErrorMessage(error));
+      return await registerWithEmail(email, password);
+    } catch (e) {
+      return rejectWithValue(friendlyAuthError(e, 'Registration failed'));
     }
   }
 );
 
-export const loginUser = createAsyncThunk(
-  'auth/login',
+export const logoutUser = createAsyncThunk('auth/logout', async () => {
+  await logoutApi();
+});
+
+export const refreshUserDetails = createAsyncThunk(
+  'auth/refreshUserDetails',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const token = (getState() as RootState).auth.user?.token;
+      const result = await refreshUserDetailsFromApi(token);
+      if (!result) return rejectWithValue('Could not refresh account');
+      return result;
+    } catch (e) {
+      return rejectWithValue(e instanceof Error ? e.message : 'Could not refresh account');
+    }
+  }
+);
+
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const trimmed = email.trim();
+      if (!trimmed) return rejectWithValue('Please enter your email address.');
+      await resetPassword(trimmed);
+      return trimmed;
+    } catch (e) {
+      return rejectWithValue(friendlyAuthError(e, 'Could not send reset email'));
+    }
+  }
+);
+
+export const confirmPasswordResetThunk = createAsyncThunk(
+  'auth/confirmPasswordReset',
   async (
-    { email, password }: { email: string; password: string },
+    { oobCode, newPassword }: { oobCode: string; newPassword: string },
     { rejectWithValue }
   ) => {
     try {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      return mapUser(credential.user);
-    } catch (error) {
-      return rejectWithValue(getErrorMessage(error));
-    }
-  }
-);
-
-export const logoutUser = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await signOut(auth);
-      return null;
-    } catch (error) {
-      return rejectWithValue(getErrorMessage(error));
+      if (!oobCode) return rejectWithValue('Invalid or missing reset link.');
+      if (!newPassword || newPassword.length < 6) {
+        return rejectWithValue('Password should be at least 6 characters.');
+      }
+      await confirmResetPassword(oobCode, newPassword);
+      return true;
+    } catch (e) {
+      return rejectWithValue(friendlyAuthError(e, 'Could not reset password'));
     }
   }
 );
@@ -114,56 +146,99 @@ const authSlice = createSlice({
       state.isLoggedIn = !!action.payload;
       state.initialized = true;
       state.error = null;
-      state.status = 'idle';
+      state.status = action.payload ? 'authenticated' : 'idle';
     },
     clearAuthError(state) {
       state.error = null;
     },
+    hydrateAuthFromStorage(state) {
+      const cached = getStoredAuthUser();
+      if (cached?.email || cached?.emailId) {
+        state.user = cached;
+        state.isLoggedIn = true;
+        state.status = 'authenticated';
+        state.isB2b = storage.getString(STORAGE_KEYS.isB2b) === 'true';
+        state.companies = getStoredCompanies();
+        state.selectedCompanyId = getSelectedCompanyId();
+      }
+    },
   },
   extraReducers: (builder) => {
+    const applySession = (
+      state: AuthState,
+      payload: { authUser: AuthUser | null; isB2b?: boolean; companies?: B2BCompany[] }
+    ) => {
+      state.user = payload.authUser;
+      state.isLoggedIn = !!payload.authUser;
+      state.isB2b = Boolean(payload.isB2b);
+      state.companies = payload.companies || [];
+      state.selectedCompanyId = getSelectedCompanyId();
+      state.status = payload.authUser ? 'authenticated' : 'idle';
+      state.error = null;
+    };
+
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload;
-        state.isLoggedIn = true;
+      .addCase(initAuth.fulfilled, (state, action) => {
         state.initialized = true;
-        state.error = null;
+        applySession(state, action.payload);
       })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as string) || 'Registration failed.';
+      .addCase(initAuth.rejected, (state) => {
+        state.initialized = true;
       })
       .addCase(loginUser.pending, (state) => {
         state.status = 'loading';
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload;
-        state.isLoggedIn = true;
         state.initialized = true;
-        state.error = null;
+        applySession(state, action.payload);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = (action.payload as string) || 'Login failed.';
+        state.error = String(action.payload || 'Login failed');
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.initialized = true;
+        applySession(state, action.payload);
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = String(action.payload || 'Registration failed');
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.isLoggedIn = false;
+        state.isB2b = false;
+        state.companies = [];
+        state.selectedCompanyId = '';
         state.status = 'idle';
         state.error = null;
       })
-      .addCase(logoutUser.rejected, (state, action) => {
+      .addCase(refreshUserDetails.fulfilled, (state, action) => {
+        state.isB2b = action.payload.isB2b;
+        state.companies = action.payload.companies;
+        state.selectedCompanyId = getSelectedCompanyId();
+      })
+      .addCase(forgotPassword.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.status = 'idle';
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = (action.payload as string) || 'Logout failed.';
+        state.error = String(action.payload || 'Could not send reset email');
       });
   },
 });
 
-export const { setUser, clearAuthError } = authSlice.actions;
+export const { setUser, clearAuthError, hydrateAuthFromStorage } = authSlice.actions;
+export const login = loginUser;
+export const register = registerUser;
+export const logout = logoutUser;
 export default authSlice.reducer;
