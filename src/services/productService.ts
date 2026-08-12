@@ -103,21 +103,32 @@ export async function productSearch(
     });
   }
 
-  if (minPrice !== '' && minPrice != null && String(minPrice) !== '0') {
+  // Seniors/Nexus: price filter values are strings; 0 / 10000 mean “no bound”
+  if (
+    minPrice !== undefined &&
+    minPrice !== null &&
+    String(minPrice) !== '' &&
+    String(minPrice) !== '0'
+  ) {
     filters.push({
       name: 'price',
       type: 'number',
       filtertype: 'From',
-      value: minPrice,
+      value: String(minPrice),
     });
   }
 
-  if (maxPrice !== '' && maxPrice != null && String(maxPrice) !== '10000') {
+  if (
+    maxPrice !== undefined &&
+    maxPrice !== null &&
+    String(maxPrice) !== '' &&
+    String(maxPrice) !== '10000'
+  ) {
     filters.push({
       name: 'price',
       type: 'number',
       filtertype: 'To',
-      value: maxPrice,
+      value: String(maxPrice),
     });
   }
 
@@ -133,7 +144,7 @@ export async function productSearch(
     manualFilters: [],
   };
 
-  if (sortprice && !['undefined', 'null'].includes(String(sortprice))) {
+  if (sortprice === 'asc' || sortprice === 'desc') {
     payload.sortBy = 'price';
     payload.orderBy = sortprice;
   }

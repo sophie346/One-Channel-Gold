@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Product } from '../types';
@@ -18,10 +18,35 @@ interface ShopViewProps {
 }
 
 const PAGE_SIZE = 9;
+/** Same ceiling Seniors uses — API treats 10000 as “no max price”. */
+const PRICE_CEILING = 10000;
+const PRICE_DEBOUNCE_MS = 300;
+
+type CatalogSort = 'featured' | 'price-asc' | 'price-desc' | 'weight-desc';
 
 function parsePage(raw: string | null) {
   const n = Number(raw);
   return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+}
+
+function parseMaxPrice(raw: string | null): number {
+  if (!raw) return PRICE_CEILING;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return PRICE_CEILING;
+  return Math.min(Math.floor(n), PRICE_CEILING);
+}
+
+function parseSort(raw: string | null): CatalogSort {
+  if (raw === 'price-asc' || raw === 'asc' || raw === 'price-low') return 'price-asc';
+  if (raw === 'price-desc' || raw === 'desc' || raw === 'price-high') return 'price-desc';
+  if (raw === 'weight-desc') return 'weight-desc';
+  return 'featured';
+}
+
+function sortToApi(sortBy: CatalogSort): '' | 'asc' | 'desc' {
+  if (sortBy === 'price-asc') return 'asc';
+  if (sortBy === 'price-desc') return 'desc';
+  return '';
 }
 
 function parseCategoriesParam(raw: string | null): string[] {
@@ -105,8 +130,9 @@ export default function ShopView({
   const [selectedKarat, setSelectedKarat] = useState(searchParams.get('karat') || 'all');
   const [selectedColor, setSelectedColor] = useState(searchParams.get('color') || 'all');
   const [selectedCondition, setSelectedCondition] = useState(searchParams.get('condition') || 'all');
-  const [priceRange, setPriceRange] = useState(Number(searchParams.get('maxPrice')) || 10000);
-  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'featured');
+  const [priceRange, setPriceRange] = useState(() => parseMaxPrice(searchParams.get('maxPrice')));
+  const [priceDraft, setPriceDraft] = useState(() => parseMaxPrice(searchParams.get('maxPrice')));
+  const [sortBy, setSortBy] = useState<CatalogSort>(() => parseSort(searchParams.get('sort')));
   const [currentPage, setCurrentPage] = useState(parsePage(searchParams.get('page')));
   const [showFilters, setShowFilters] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -119,6 +145,7 @@ export default function ShopView({
   const [error, setError] = useState<string | null>(null);
 
   const selectedCategoriesKey = selectedCategories.join('\0');
+  const priceDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const syncUrl = useCallback(
     (next: {
@@ -147,7 +174,7 @@ export default function ShopView({
       setOrDelete('sort', next.sort ?? sortBy, ['featured']);
 
       const max = next.maxPrice ?? priceRange;
-      if (max < 10000) params.set('maxPrice', String(max));
+      if (max < PRICE_CEILING) params.set('maxPrice', String(max));
       else params.delete('maxPrice');
 
       const page = next.page ?? currentPage;
@@ -181,6 +208,44 @@ export default function ShopView({
     [syncUrl],
   );
 
+  const resetToFirstPage = useCallback(
+    (next: Parameters<typeof syncUrl>[0]) => {
+      setCurrentPage(1);
+      syncUrl({ ...next, page: 1 });
+    },
+    [syncUrl],
+  );
+
+  /** Commit max price to API + URL (Seniors-style), always returning to page 1. */
+  const commitPrice = useCallback(
+    (max: number) => {
+      if (priceDebounceRef.current) {
+        clearTimeout(priceDebounceRef.current);
+        priceDebounceRef.current = null;
+      }
+      const next = parseMaxPrice(String(max));
+      setPriceDraft(next);
+      setPriceRange(next);
+      setCurrentPage(1);
+      syncUrl({ maxPrice: next, page: 1 });
+    },
+    [syncUrl],
+  );
+
+  const onPriceSliderChange = (value: number) => {
+    setPriceDraft(value);
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    priceDebounceRef.current = setTimeout(() => {
+      commitPrice(value);
+    }, PRICE_DEBOUNCE_MS);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
@@ -211,39 +276,52 @@ export default function ShopView({
       setLoading(true);
       setError(null);
 
-      const sortprice =
-        sortBy === 'price-asc' ? 'asc' : sortBy === 'price-desc' ? 'desc' : '';
+      try {
+        const customFilters =
+          selectedKarat !== 'all'
+            ? [
+                {
+                  name: 'attributes.purity',
+                  type: 'string',
+                  filtertype: 'Equals',
+                  value: selectedKarat,
+                },
+              ]
+            : [];
 
-      const result = await productSearch({
-        page: Math.max(0, currentPage - 1),
-        limit: PAGE_SIZE,
-        text: searchQuery || '',
-        category: selectedCategories.length ? selectedCategories : undefined,
-        maxPrice: priceRange < 10000 ? priceRange : '',
-        sortprice: sortprice as 'asc' | 'desc' | '',
-        showcount: true,
-      });
+        const result = await productSearch({
+          page: Math.max(0, currentPage - 1),
+          limit: PAGE_SIZE,
+          text: searchQuery || '',
+          category: selectedCategories.length ? selectedCategories : undefined,
+          // Seniors: ceiling → 10000 so BFF skips the price To filter
+          maxPrice: priceRange >= PRICE_CEILING ? 10000 : priceRange,
+          sortprice: sortToApi(sortBy),
+          showcount: true,
+          customFilters,
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.error) {
-        setProducts([]);
-        setTotalProducts(0);
-        setError(result.message || 'Failed to load products');
-        setLoading(false);
-        return;
+        if (result.error) {
+          setProducts([]);
+          setTotalProducts(0);
+          setError(result.message || 'Failed to load products');
+          return;
+        }
+
+        setProducts(result.productsList.map(mapApiProductToProduct));
+        setTotalProducts(result.totalProducts);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      setProducts(result.productsList.map(mapApiProductToProduct));
-      setTotalProducts(result.totalProducts);
-      setLoading(false);
     }
 
     load();
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, selectedCategoriesKey, priceRange, sortBy, currentPage]);
+  }, [searchQuery, selectedCategoriesKey, selectedKarat, priceRange, sortBy, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
 
@@ -253,16 +331,14 @@ export default function ShopView({
     }
   }, [loading, totalProducts, currentPage, totalPages, goToPage]);
 
+  // Color/condition stay client-side. Karat purity is API-only via attributes.purity.
+  // Price is filtered by API and tightened locally because BFF To-price can overshoot.
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        if (selectedKarat !== 'all') {
-          const want = selectedKarat.toUpperCase();
-          if (product.karat.toUpperCase() !== want) return false;
-        }
         if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
         if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
-        if (product.price > priceRange) return false;
+        if (priceRange < PRICE_CEILING && product.price > priceRange) return false;
         return true;
       })
       .sort((a, b) => {
@@ -271,7 +347,7 @@ export default function ShopView({
         if (sortBy === 'price-desc') return b.price - a.price;
         return 0;
       });
-  }, [products, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy]);
+  }, [products, selectedColor, selectedCondition, priceRange, sortBy]);
 
   const rangeStart = totalProducts === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalProducts);
@@ -295,19 +371,16 @@ export default function ShopView({
   };
 
   const clearFilters = () => {
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
     setSelectedCategories([]);
     setSelectedKarat('all');
     setSelectedColor('all');
     setSelectedCondition('all');
-    setPriceRange(10000);
+    setPriceRange(PRICE_CEILING);
+    setPriceDraft(PRICE_CEILING);
     setSortBy('featured');
     setCurrentPage(1);
     router.replace(pathname, { scroll: false });
-  };
-
-  const resetToFirstPage = (next: Parameters<typeof syncUrl>[0]) => {
-    setCurrentPage(1);
-    syncUrl({ ...next, page: 1 });
   };
 
   const isCategorySelected = (name: string) =>
@@ -473,19 +546,25 @@ export default function ShopView({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Max Price</label>
-                  <span className="text-sm font-bold text-[#C8A45D]">${priceRange.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-[#C8A45D]">
+                    {priceDraft >= PRICE_CEILING ? 'Any' : `$${priceDraft.toLocaleString()}`}
+                  </span>
                 </div>
                 <input
                   type="range"
                   min={50}
-                  max={10000}
+                  max={PRICE_CEILING}
                   step={50}
-                  value={priceRange}
-                  onChange={(e) => setPriceRange(Number(e.target.value))}
-                  onMouseUp={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
-                  onTouchEnd={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
+                  value={priceDraft}
+                  onChange={(e) => onPriceSliderChange(Number(e.target.value))}
+                  onMouseUp={(e) => commitPrice(Number((e.target as HTMLInputElement).value))}
+                  onTouchEnd={(e) => commitPrice(Number((e.target as HTMLInputElement).value))}
                   className="w-full accent-[#C8A45D] cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[#6B7280]">
+                  <span>$50</span>
+                  <span>${PRICE_CEILING.toLocaleString()}</span>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -493,8 +572,9 @@ export default function ShopView({
                 <select
                   value={sortBy}
                   onChange={(e) => {
-                    setSortBy(e.target.value);
-                    resetToFirstPage({ sort: e.target.value });
+                    const next = parseSort(e.target.value);
+                    setSortBy(next);
+                    resetToFirstPage({ sort: next });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
