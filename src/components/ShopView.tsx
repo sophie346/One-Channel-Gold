@@ -143,9 +143,15 @@ export default function ShopView({
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
   const selectedCategoriesKey = selectedCategories.join('\0');
   const priceDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const syncUrl = useCallback(
     (next: {
@@ -248,7 +254,7 @@ export default function ShopView({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     let cancelled = false;
@@ -292,7 +298,7 @@ export default function ShopView({
         const result = await productSearch({
           page: Math.max(0, currentPage - 1),
           limit: PAGE_SIZE,
-          text: searchQuery || '',
+          text: debouncedSearch || '',
           category: selectedCategories.length ? selectedCategories : undefined,
           // Seniors: ceiling → 10000 so BFF skips the price To filter
           maxPrice: priceRange >= PRICE_CEILING ? 10000 : priceRange,
@@ -321,7 +327,7 @@ export default function ShopView({
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, selectedCategoriesKey, selectedKarat, priceRange, sortBy, currentPage]);
+  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, priceRange, sortBy, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
 

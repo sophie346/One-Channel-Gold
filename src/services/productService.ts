@@ -292,3 +292,47 @@ export async function createIntakeQueue(
     };
   }
 }
+
+export interface GlobalSearchHit {
+  sku?: string;
+  osku?: string;
+  title?: string;
+  name?: string;
+  website_title?: string;
+  slug?: string;
+  images?: Array<{ url?: string; thumb?: string } | string>;
+  image?: string;
+  [key: string]: unknown;
+}
+
+export interface GlobalSearchExtra {
+  type?: string;
+  name?: string;
+  id?: string;
+}
+
+export interface GlobalSearchResult {
+  error?: boolean;
+  message?: string;
+  data?: GlobalSearchHit[];
+  extra?: GlobalSearchExtra[];
+}
+
+/** Nexus GlobalSearch — POST globalsearch?text= */
+export async function globalSearch(text: string): Promise<GlobalSearchResult> {
+  const q = encodeURIComponent(text.trim());
+  if (!q) return { data: [], extra: [] };
+  try {
+    return await bffRequest<GlobalSearchResult>(`globalsearch?text=${q}`, {
+      method: 'POST',
+      body: {},
+    });
+  } catch (err) {
+    return {
+      error: true,
+      message: err instanceof Error ? err.message : 'Search failed',
+      data: [],
+      extra: [],
+    };
+  }
+}
