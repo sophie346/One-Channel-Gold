@@ -59,14 +59,27 @@ export async function addToCartApi(
   return res;
 }
 
+/** Resolve cart line key the same way Nexus does (`osku || sku`). */
+function resolveCartOsku(item: ApiCartItem): string {
+  return String(item?.osku || item?.sku || '').trim();
+}
+
 export async function updateCartItemQty(
   item: ApiCartItem,
   quantity: number,
   token?: string | null
 ) {
-  return addToCartApi(item.osku, quantity, { osku: item.osku, sku: item.sku }, token);
+  const osku = resolveCartOsku(item);
+  if (!osku) {
+    return { error: true, message: 'Missing product SKU.' } as CartResponse;
+  }
+  return addToCartApi(osku, quantity, { osku, sku: item.sku || osku }, token);
 }
 
 export async function removeCartItem(item: ApiCartItem, token?: string | null) {
-  return addToCartApi(item.osku, 0, { osku: item.osku, sku: item.sku }, token);
+  const osku = resolveCartOsku(item);
+  if (!osku) {
+    return { error: true, message: 'Missing product SKU.' } as CartResponse;
+  }
+  return addToCartApi(osku, 0, { osku, sku: item.sku || osku }, token);
 }

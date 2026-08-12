@@ -24,11 +24,15 @@ export default function CartPage() {
   const [couponInput, setCouponInput] = useState(totals.coupon || '');
   const [couponMessage, setCouponMessage] = useState('');
   const busy = status === 'loading';
+  const cartError = totals.error;
 
   const shipping = totals.shipping;
   const tax = totals.tax;
   const discount = totals.discount;
   const total = totals.orderTotal || subtotal + shipping + tax - discount;
+
+  const lineId = (item: (typeof items)[number]) =>
+    String(item.osku || item.sku || item.id || '').trim();
 
   const handleCoupon = async () => {
     setCouponMessage('');
@@ -38,6 +42,18 @@ export default function CartPage() {
     } else {
       setCouponMessage(String(result.payload || 'Invalid coupon code'));
     }
+  };
+
+  const handleRemove = (item: (typeof items)[number]) => {
+    const id = lineId(item);
+    if (!id || busy) return;
+    dispatch(removeFromCart(id));
+  };
+
+  const handleQty = (item: (typeof items)[number], quantity: number) => {
+    const id = lineId(item);
+    if (!id || busy) return;
+    dispatch(setCartItemQuantity({ productId: id, quantity }));
   };
 
   if (items.length === 0 && !busy) {
@@ -71,14 +87,21 @@ export default function CartPage() {
         {busy && <Loader2 className="w-5 h-5 animate-spin text-[#C8A45D]" />}
       </div>
 
+      {cartError && (
+        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {cartError}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-4">
           {items.map((item) => (
             <div
-              key={item.id}
+              key={lineId(item) || item.id}
               className="flex flex-col sm:flex-row gap-4 p-4 bg-[#111111] border border-white/[0.08] rounded-2xl"
             >
               <button
+                type="button"
                 onClick={() => router.push(`/buy/${item.slug}${item.sku ? `?sku=${encodeURIComponent(item.sku)}` : ''}`)}
                 className="w-full sm:w-28 h-28 shrink-0 rounded-xl overflow-hidden bg-[#0A0A0A] cursor-pointer"
               >
@@ -96,6 +119,7 @@ export default function CartPage() {
                       {item.sku || item.category}
                     </p>
                     <button
+                      type="button"
                       onClick={() => router.push(`/buy/${item.slug}${item.sku ? `?sku=${encodeURIComponent(item.sku)}` : ''}`)}
                       className="text-[15px] font-semibold text-white hover:text-[#E3C27A] text-left cursor-pointer"
                     >
@@ -106,7 +130,8 @@ export default function CartPage() {
                     ) : null}
                   </div>
                   <button
-                    onClick={() => dispatch(removeFromCart(item.id))}
+                    type="button"
+                    onClick={() => handleRemove(item)}
                     disabled={busy}
                     className="p-2 text-[#9CA3AF] hover:text-red-400 cursor-pointer h-fit disabled:opacity-50"
                     aria-label="Remove"
@@ -118,9 +143,8 @@ export default function CartPage() {
                 <div className="flex items-center justify-between">
                   <div className="inline-flex items-center gap-2 bg-[#0A0A0A] border border-white/10 rounded-lg p-1">
                     <button
-                      onClick={() =>
-                        dispatch(setCartItemQuantity({ productId: item.id, quantity: item.quantity - 1 }))
-                      }
+                      type="button"
+                      onClick={() => handleQty(item, item.quantity - 1)}
                       disabled={busy}
                       className="p-1.5 text-[#9CA3AF] hover:text-white cursor-pointer disabled:opacity-50"
                     >
@@ -128,9 +152,8 @@ export default function CartPage() {
                     </button>
                     <span className="w-8 text-center text-sm font-semibold text-white">{item.quantity}</span>
                     <button
-                      onClick={() =>
-                        dispatch(setCartItemQuantity({ productId: item.id, quantity: item.quantity + 1 }))
-                      }
+                      type="button"
+                      onClick={() => handleQty(item, item.quantity + 1)}
                       disabled={busy}
                       className="p-1.5 text-[#9CA3AF] hover:text-white cursor-pointer disabled:opacity-50"
                     >

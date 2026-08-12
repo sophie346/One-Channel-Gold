@@ -56,15 +56,17 @@ export function mapApiCartItemToCartItem(item: ApiCartItem): CartItem {
     item.original__Price != null ? Number(item.original__Price) : undefined;
   const originalLineTotal =
     item.original__Total != null ? Number(item.original__Total) : undefined;
-  const sku = String(item.osku || item.sku || '');
-  const name = String(item.title || item.name || sku || 'Gold item');
+  const osku = String(item.osku || '').trim();
+  const sku = String(item.sku || '').trim();
+  const id = osku || sku;
+  const name = String(item.title || item.name || id || 'Gold item');
   const discountLabels = Array.isArray(item.discountsFounds)
     ? item.discountsFounds.map((d) => String(d?.name || d?.code || '').trim()).filter(Boolean)
     : [];
 
   return {
-    id: sku,
-    slug: String(item.slug || slugify(sku || name)),
+    id,
+    slug: String(item.slug || slugify(id || name)),
     name,
     category: 'bars',
     karat: '',
@@ -78,8 +80,8 @@ export function mapApiCartItemToCartItem(item: ApiCartItem): CartItem {
     availability: 'In Stock',
     metalColor: 'Yellow Gold',
     condition: 'Brand New',
-    sku,
-    osku: sku,
+    sku: sku || osku,
+    osku: osku || sku,
     quantity,
     unitPrice,
     lineTotal,
@@ -88,6 +90,14 @@ export function mapApiCartItemToCartItem(item: ApiCartItem): CartItem {
     discountApplied: item.discount__applied,
     discountLabels,
   };
+}
+
+function findApiCartItem(apiItems: ApiCartItem[], productId: string) {
+  const id = String(productId || '').trim();
+  if (!id) return undefined;
+  return apiItems.find(
+    (i) => String(i.osku || '').trim() === id || String(i.sku || '').trim() === id
+  );
 }
 
 function pickNumber(...values: unknown[]): number {
@@ -200,8 +210,8 @@ export const addProductToCart = createAsyncThunk(
   ) => {
     try {
       const state = getState() as RootState;
-      const osku = String(product.sku || product.osku || product.id);
-      const existing = state.cart.apiItems.find((i) => i.osku === osku || i.sku === osku);
+      const osku = String(product.sku || product.osku || product.id || '').trim();
+      const existing = findApiCartItem(state.cart.apiItems, osku);
       const desiredQty = (Number(existing?.quantity) || 0) + Math.max(1, quantity);
       const res = await addToCartApi(
         osku,
@@ -225,10 +235,16 @@ export const setCartItemQuantity = createAsyncThunk(
   ) => {
     try {
       const state = getState() as RootState;
-      const apiItem = state.cart.apiItems.find((i) => i.osku === productId || i.sku === productId);
+      const apiItem = findApiCartItem(state.cart.apiItems, productId);
       if (!apiItem) throw new Error('Cart item not found');
-      if (quantity <= 0) return await removeCartItem(apiItem, selectToken(state));
-      return await updateCartItemQty(apiItem, quantity, selectToken(state));
+      const res =
+        quantity <= 0
+          ? await removeCartItem(apiItem, selectToken(state))
+          : await updateCartItemQty(apiItem, quantity, selectToken(state));
+      if (res?.error) {
+        return rejectWithValue(res.message || 'Failed to update quantity');
+      }
+      return res;
     } catch (e) {
       return rejectWithValue(e instanceof Error ? e.message : 'Failed to update quantity');
     }
@@ -240,9 +256,13 @@ export const removeFromCart = createAsyncThunk(
   async (productId: string, { getState, rejectWithValue }) => {
     try {
       const state = getState() as RootState;
-      const apiItem = state.cart.apiItems.find((i) => i.osku === productId || i.sku === productId);
+      const apiItem = findApiCartItem(state.cart.apiItems, productId);
       if (!apiItem) throw new Error('Cart item not found');
-      return await removeCartItem(apiItem, selectToken(state));
+      const res = await removeCartItem(apiItem, selectToken(state));
+      if (res?.error) {
+        return rejectWithValue(res.message || 'Failed to remove item');
+      }
+      return res;
     } catch (e) {
       return rejectWithValue(e instanceof Error ? e.message : 'Failed to remove item');
     }
