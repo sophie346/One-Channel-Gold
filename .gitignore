@@ -21,6 +21,9 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Local shared library checkout
+SharedLibrary/
+
 # Editor / OS
 .DS_Store
 *.swp
