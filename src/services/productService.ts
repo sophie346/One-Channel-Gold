@@ -256,3 +256,39 @@ export async function getProductBySlug(
 
   return null;
 }
+
+export interface IntakeQueueResult {
+  error?: boolean;
+  message?: string;
+  id?: string;
+  referenceId?: string;
+  intakeId?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Nexus `createIntakeQueue` — POST prod/createIntakeQueue
+ */
+export async function createIntakeQueue(
+  payload: Record<string, unknown>,
+  token?: string | null,
+): Promise<IntakeQueueResult> {
+  try {
+    const data = await bffRequest<IntakeQueueResult>('prod/createIntakeQueue', {
+      body: payload,
+      extraHeaders: token ? { authorization: `Bearer ${token}` } : {},
+    });
+    if (data?.error) {
+      return {
+        error: true,
+        message: data.message || 'Failed to submit quote request',
+      };
+    }
+    return data || {};
+  } catch (err) {
+    return {
+      error: true,
+      message: err instanceof Error ? err.message : 'Failed to submit quote request',
+    };
+  }
+}

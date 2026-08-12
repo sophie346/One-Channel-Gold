@@ -19,7 +19,7 @@ import OrderSuccessPage from '@/components/OrderSuccessPage';
 import ResetPasswordPage from '@/components/ResetPasswordPage';
 import AuctionsView from '@/components/AuctionsView';
 import ServicesView from '@/components/ServicesView';
-import WorkflowsView from '@/components/WorkflowsView';
+import WorkflowsView, { type SellEstimatePrefill } from '@/components/WorkflowsView';
 import WholesaleAndStorage from '@/components/WholesaleAndStorage';
 import StaticPages from '@/components/StaticPages';
 import PortalDashboard from '@/components/PortalDashboard';
@@ -64,6 +64,7 @@ export default function App() {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeWorkflow, setActiveWorkflow] = useState<'sell' | 'pawn' | 'appraisal' | null>(null);
+  const [sellEstimate, setSellEstimate] = useState<SellEstimatePrefill | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
 
   const { user, isLoggedIn, initialized } = useAppSelector((state) => state.auth);
@@ -271,7 +272,12 @@ export default function App() {
             {/* Injected Calculator */}
             <div className="w-full">
               <h3 className="text-base font-black text-[#F7F4EC] uppercase tracking-widest mb-5">Payout Value Estimator</h3>
-              <GoldCalculator />
+              <GoldCalculator
+                onEstimateAction={(estimate) => {
+                  setSellEstimate(estimate);
+                  setActiveWorkflow('sell');
+                }}
+              />
             </div>
 
             {/* Direct call to action to trigger wizard */}
@@ -480,9 +486,13 @@ export default function App() {
       {activeWorkflow && (
         <WorkflowsView
           type={activeWorkflow}
-          onClose={() => setActiveWorkflow(null)}
+          onClose={() => {
+            setActiveWorkflow(null);
+            setSellEstimate(null);
+          }}
           onSubmit={handleWorkflowSubmit}
           onShowNotification={showNotification}
+          initialEstimate={activeWorkflow === 'sell' ? sellEstimate : null}
         />
       )}
 
