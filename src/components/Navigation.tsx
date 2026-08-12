@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Menu, X, Search, TrendingUp, TrendingDown, ShoppingBag, Heart, ChevronDown,
   User, Package, MapPin, FileText, Truck, KeyRound, Shield,
 } from 'lucide-react';
 import { DEMO_SPOT_PRICE_OUNCE } from '../data/mockData';
+import HeaderSearch from '@/components/HeaderSearch';
 
 interface NavigationProps {
   currentTab: string;
@@ -46,6 +48,7 @@ export default function Navigation({
   cartCount,
   openCart,
 }: NavigationProps) {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -322,23 +325,25 @@ export default function Navigation({
             <div className="flex justify-between items-center mb-4">
               <span className="text-[12px] uppercase tracking-widest text-[#C5A059] font-semibold">Search</span>
               <button
-                onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                onClick={() => setSearchOpen(false)}
                 className="p-2 text-[#9CA3AF] hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="relative">
-              <input
-                autoFocus
-                type="text"
-                placeholder="Search gold, auctions, loans..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#111] border border-white/10 rounded-xl text-[16px] text-white px-4 py-3.5 pr-12 focus:outline-none focus:border-[#C5A059]/50 placeholder-[#6B7280]"
-              />
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-[#C5A059] w-5 h-5" />
-            </div>
+            <HeaderSearch
+              onClose={() => setSearchOpen(false)}
+              onViewAll={(text) => {
+                setSearchQuery(text);
+                setSearchOpen(false);
+                handleNavClick('buy');
+              }}
+              onSelectCategory={(name) => {
+                setSearchQuery('');
+                setSearchOpen(false);
+                router.push(`/buy?categories=${encodeURIComponent(name)}`);
+              }}
+            />
           </div>
         </div>
       )}

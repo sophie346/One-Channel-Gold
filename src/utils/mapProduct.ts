@@ -174,10 +174,18 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     api.category || attr(api, 'category', 'Category') || api.brand;
   const colorRaw = attr(api, 'color', 'metalColor', 'metal_color', 'tone');
   const materialRaw = attr(api, 'material', 'Material');
-  const karat =
-    extractKarat(title, api.description, materialRaw, attr(api, 'karat', 'Karat')) ||
-    String(attr(api, 'karat', 'Karat', 'purity_karat') || '');
   const purityRaw = attr(api, 'purity', 'Purity');
+  const karat =
+    extractKarat(
+      purityRaw,
+      attr(api, 'karat', 'Karat', 'purity_karat'),
+      title,
+      api.description,
+      materialRaw,
+      api.specifications && typeof api.specifications === 'object'
+        ? (api.specifications as Record<string, unknown>)['Gold Kt']
+        : '',
+    ) || String(purityRaw || attr(api, 'karat', 'Karat', 'purity_karat') || '');
   const weightRaw = attr(api, 'weight', 'Weight', 'net_weight', 'metal_weight');
   const weight = Number(weightRaw);
 

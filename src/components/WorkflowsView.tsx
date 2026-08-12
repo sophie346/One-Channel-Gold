@@ -1,23 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, X, ShieldCheck, Scale, FileText, CheckCircle2, ChevronRight, ChevronLeft, Calendar, MapPin, Calculator, AlertCircle } from 'lucide-react';
+import { Upload, X, ShieldCheck, Scale, FileText, CheckCircle2, ChevronRight, ChevronLeft, Calendar, MapPin, Calculator, AlertCircle, Loader2 } from 'lucide-react';
 import { DEMO_SPOT_PRICE_GRAM, KARAT_FACTORS } from '../data/mockData';
+import { useAppSelector } from '@/store/hooks';
+import { createIntakeQueue } from '@/services/productService';
+
+export type SellEstimatePrefill = {
+  weight?: number;
+  karat?: string;
+  itemType?: string;
+  fineWeight?: number;
+  meltValue?: number;
+  offerMin?: number;
+  offerMax?: number;
+};
 
 interface WorkflowProps {
   type: 'sell' | 'pawn' | 'appraisal';
   onClose: () => void;
   onSubmit: (data: any) => void;
   onShowNotification?: (msg: string, type?: 'success' | 'info' | 'error') => void;
+  initialEstimate?: SellEstimatePrefill | null;
 }
 
-export default function WorkflowsView({ type, onClose, onSubmit, onShowNotification }: WorkflowProps) {
+const SELL_INTAKE_SKU = 'SELL-GOLD';
+
+export default function WorkflowsView({
+  type,
+  onClose,
+  onSubmit,
+  onShowNotification,
+  initialEstimate,
+}: WorkflowProps) {
+  const user = useAppSelector((s) => s.auth.user);
+  const isLoggedIn = Boolean(user?.email || user?.emailId);
   const [step, setStep] = useState(1);
   const [dragOver, setDragOver] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [intakeReference, setIntakeReference] = useState('');
 
   // Common Form States
   const [itemName, setItemName] = useState('');
-  const [itemType, setItemType] = useState('jewelry');
-  const [weight, setWeight] = useState(15);
-  const [karat, setKarat] = useState('18K');
+  const [itemType, setItemType] = useState(initialEstimate?.itemType || 'jewelry');
+  const [weight, setWeight] = useState(initialEstimate?.weight || 15);
+  const [karat, setKarat] = useState(initialEstimate?.karat || '18K');
   const [shippingMethod, setShippingMethod] = useState<'Store Visit' | 'Secure Pickup' | 'Insured Mail-In'>('Insured Mail-In');
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   
@@ -53,6 +78,21 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
     setCalcMaxOffer(Math.round(melt * 0.98));
   }, [weight, karat]);
 
+  useEffect(() => {
+    if (!user) return;
+    const accountEmail = String(user.email || user.emailId || '').trim();
+    const accountName = String(user.name || user.displayName || '').trim();
+    if (accountEmail && !email) setEmail(accountEmail);
+    if (accountName && !fullName) setFullName(accountName);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!initialEstimate) return;
+    if (initialEstimate.weight) setWeight(initialEstimate.weight);
+    if (initialEstimate.karat) setKarat(initialEstimate.karat);
+    if (initialEstimate.itemType) setItemType(initialEstimate.itemType);
+  }, [initialEstimate]);
+
   // Mock Photo Drag-and-Drop
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -77,36 +117,157 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
     setIdVerified(true);
   };
 
-  const executeSubmit = () => {
-    if (!acceptTerms) {
-      if (onShowNotification) {
-        onShowNotification('Terms and legally binding agreements must be accepted prior to 1CA secure lockbox logging.', 'error');
-      } else {
-        alert('Terms and legally binding agreements must be accepted prior to 1CA secure lockbox logging.');
-      }
-      return;
-    }
+  const notify = (msg: string, kind: 'success' | 'info' | 'error' = 'error') => {
+    if (onShowNotification) onShowNotification(msg, kind);
+    else alert(msg);
+  };
 
-    const compiledData = {
+  const compiledSellData = () => {
+    const title = itemName.trim() || `${karat} Gold ${itemType}`;
+    return {
       type,
-      itemName: itemName || `${karat} Gold ${itemType}`,
+      itemName: title,
+      itemType,
       weight,
       karat,
       shippingMethod,
       calcMeltValue,
       calcMinOffer,
       calcMaxOffer,
-      fullName,
-      email,
+      fullName: fullName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      address: address.trim(),
+      uploadedPhotos,
       signatureText,
+      idVerified,
+      idDocument,
       appraisalService,
       location,
       bookingDate,
-      bookingTime
+      bookingTime,
+    };
+  };
+
+  const goNext = () => {
+    if ((type === 'sell' || type === 'pawn') && step === 4) {
+      if (!fullName.trim()) {
+        notify('Please enter your full name.');
+        return;
+      }
+      if (!email.trim()) {
+        notify(
+          isLoggedIn
+            ? 'Please enter your email address.'
+            : 'Please enter your email so we can send your quote.',
+        );
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        notify('Please enter a valid email address.');
+        return;
+      }
+      if (!phone.trim()) {
+        notify('Please enter your phone number.');
+        return;
+      }
+    }
+    setStep((prev) => prev + 1);
+  };
+
+  const executeSubmit = async () => {
+    if (!acceptTerms) {
+      notify('Terms and legally binding agreements must be accepted prior to 1CA secure lockbox logging.');
+      return;
+    }
+
+    const compiledData = compiledSellData();
+
+    if (type !== 'sell') {
+      onSubmit(compiledData);
+      setStep(type === 'appraisal' ? 5 : 6);
+      return;
+    }
+
+    if (!compiledData.fullName) {
+      notify('Please enter your full name.');
+      setStep(4);
+      return;
+    }
+    if (!compiledData.email) {
+      notify(
+        isLoggedIn
+          ? 'Please enter your email address.'
+          : 'Please enter your email so we can send your quote.',
+      );
+      setStep(4);
+      return;
+    }
+    if (!compiledData.phone) {
+      notify('Please enter your phone number.');
+      setStep(4);
+      return;
+    }
+
+    setSubmitting(true);
+    const productURL = typeof window !== 'undefined' ? window.location.href : '';
+    const subject = `Sell Gold Quote - ${compiledData.itemName}`;
+
+    const extraData: Record<string, string> = {
+      quote_mode: 'sell-gold',
+      item_name: compiledData.itemName,
+      item_type: compiledData.itemType,
+      weight: String(compiledData.weight),
+      karat: compiledData.karat,
+      shipping_method: compiledData.shippingMethod,
+      melt_value: String(compiledData.calcMeltValue),
+      offer_min: String(compiledData.calcMinOffer),
+      offer_max: String(compiledData.calcMaxOffer),
+      address: compiledData.address,
+      photos: compiledData.uploadedPhotos.join(', '),
+      signature: compiledData.signatureText,
+      id_verified: compiledData.idVerified ? 'true' : 'false',
+    };
+    if (compiledData.idDocument) extraData.id_document = compiledData.idDocument;
+
+    const payload: Record<string, unknown> = {
+      fullName: compiledData.fullName,
+      email: compiledData.email,
+      phoneNumber: compiledData.phone,
+      sku: SELL_INTAKE_SKU,
+      productTitle: compiledData.itemName,
+      productURL,
+      subject,
+      redirectURL: productURL,
+      zipCode: '',
+      requestedItems: [
+        {
+          sku: SELL_INTAKE_SKU,
+          title: compiledData.itemName,
+          quantity: 1,
+        },
+      ],
+      ExtraData: extraData,
     };
 
-    onSubmit(compiledData);
-    setStep(type === 'appraisal' ? 5 : 6); // Move to completion step
+    try {
+      const res = await createIntakeQueue(payload, user?.token || user?.accessToken);
+      if (res?.error) {
+        notify(res.message || 'Failed to submit quote request. Please try again.');
+        return;
+      }
+      const ref =
+        res?.id ||
+        res?.referenceId ||
+        res?.intakeId ||
+        `QUOTE-${Math.random().toString(36).slice(2, 11).toUpperCase()}`;
+      setIntakeReference(String(ref));
+      onSubmit({ ...compiledData, intakeReference: String(ref) });
+      notify('Quote request submitted successfully.', 'success');
+      setStep(6);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Titles Mapping
@@ -366,6 +527,13 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
           {/* ==================== SELL GOLD / PAWN STEP 4 (VERIFICATION) ==================== */}
           {step === 4 && (type === 'sell' || type === 'pawn') && (
             <div className="space-y-4">
+              {!isLoggedIn && type === 'sell' && (
+                <div className="p-3 bg-[#C8A45D]/10 border border-[#C8A45D]/30 rounded-lg">
+                  <p className="text-xs text-[#E3C27A] leading-relaxed">
+                    You are not signed in. Enter your email so we can send your sell-gold quote.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Client Legal Name</label>
@@ -379,7 +547,9 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Email Address</label>
+                  <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">
+                    Email Address {!isLoggedIn ? '*' : ''}
+                  </label>
                   <input
                     type="email"
                     required
@@ -389,6 +559,18 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
                     className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2 text-xs text-[#F7F4EC]"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] text-[#AEB4C0] uppercase tracking-wider mb-1.5 font-bold">Phone Number *</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="(555) 123-4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full bg-[#11141A] border border-[rgba(255,255,255,0.08)] rounded p-2 text-xs text-[#F7F4EC]"
+                />
               </div>
 
               <div>
@@ -669,7 +851,8 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
               <div className="bg-[#11141A] p-4 rounded-lg border border-white/5 font-mono text-xs max-w-xs mx-auto space-y-1.5 text-left text-[#AEB4C0]">
                 <p className="text-[13px] uppercase text-[#C8A45D] font-bold">1CA SECURE LOG</p>
                 <p>Status: <span className="text-[#2F9D70] font-bold">Audit Verified</span></p>
-                <p>Transaction ID: <span className="text-[#F7F4EC] font-bold">1CA-TX-{Math.floor(Math.random() * 900000 + 100000)}</span></p>
+                <p>Transaction ID: <span className="text-[#F7F4EC] font-bold">{intakeReference || `1CA-TX-${Math.floor(Math.random() * 900000 + 100000)}`}</span></p>
+                {email ? <p>Email: <span className="text-[#F7F4EC] font-semibold">{email}</span></p> : null}
                 <p>Timestamp: <span className="text-[#F7F4EC] font-semibold">{new Date().toISOString().replace('T', ' ').slice(0, 19)} UTC</span></p>
               </div>
 
@@ -696,15 +879,24 @@ export default function WorkflowsView({ type, onClose, onSubmit, onShowNotificat
             {step === activeSteps.length ? (
               <button
                 type="button"
+                disabled={submitting}
                 onClick={executeSubmit}
-                className="px-6 py-2 bg-[#C8A45D] hover:bg-[#E3C27A] text-[#080A0D] rounded text-xs font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-all duration-150"
+                className="px-6 py-2 bg-[#C8A45D] hover:bg-[#E3C27A] disabled:opacity-50 text-[#080A0D] rounded text-xs font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-all duration-150"
               >
-                Submit &amp; Lock <ShieldCheck className="w-4 h-4" />
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting…
+                  </>
+                ) : (
+                  <>
+                    Submit &amp; Lock <ShieldCheck className="w-4 h-4" />
+                  </>
+                )}
               </button>
             ) : (
               <button
                 type="button"
-                onClick={() => setStep(prev => prev + 1)}
+                onClick={goNext}
                 className="px-6 py-2 bg-white/10 hover:bg-[#C8A45D] hover:text-[#080A0D] rounded text-xs text-[#F7F4EC] uppercase font-bold tracking-wider flex items-center gap-1 cursor-pointer transition-all duration-150"
               >
                 Next Step <ChevronRight className="w-4 h-4" />

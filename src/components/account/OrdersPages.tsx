@@ -2,9 +2,10 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Download, Eye, Loader2, Package, RotateCcw, X, ArrowLeft } from 'lucide-react';
+import { ChevronDown, Download, Eye, FileBadge, Loader2, Package, RotateCcw, X, ArrowLeft } from 'lucide-react';
 import { AccountLayout } from '@/components/account/AccountLayout';
 import { OrderInvoiceDocument, printOrderInvoice } from '@/components/account/OrderInvoiceDocument';
+import { OrderCertificateDocument, printOrderCertificate } from '@/components/account/OrderCertificateDocument';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { reorderOrderToCart } from '@/store/cartSlice';
 import { refreshUserDetails } from '@/store/authSlice';
@@ -116,6 +117,40 @@ function InvoiceModal({
   );
 }
 
+function CertificateModal({
+  order,
+  onClose,
+}: {
+  order: StoreOrder;
+  onClose: () => void;
+}) {
+  const printRef = useRef<HTMLDivElement>(null);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+      <div className="bg-[#171A21] rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <h2 className="font-bold text-white">E-Certificate #{order.orderId}</h2>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => printOrderCertificate(printRef.current, order.orderId)}
+              className="h-9 px-3 rounded-full bg-[#C8A45D] text-black text-xs font-bold uppercase cursor-pointer"
+            >
+              Print / Save PDF
+            </button>
+            <button type="button" onClick={onClose} className="p-2 rounded-full hover:bg-white/5 text-[#AEB4C0] cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <div className="overflow-auto bg-slate-100 p-3">
+          <OrderCertificateDocument ref={printRef} order={order} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OrdersListPage({
   variant,
   onNotify,
@@ -133,6 +168,8 @@ export function OrdersListPage({
   const [reorderingId, setReorderingId] = useState<string | null>(null);
   const [invoiceOrder, setInvoiceOrder] = useState<StoreOrder | null>(null);
   const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
+  const [certificateOrder, setCertificateOrder] = useState<StoreOrder | null>(null);
+  const [certificateLoadingId, setCertificateLoadingId] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -178,6 +215,24 @@ export function OrdersListPage({
     }
   };
 
+  const openCertificate = async (order: StoreOrder) => {
+    const id = order.orderId;
+    if (!id || !user?.token) return;
+    setCertificateLoadingId(id);
+    try {
+      const res = await fetchOrderById(user.token, id);
+      if (res.error || !res.order) {
+        onNotify?.(res.message || 'Could not load e-certificate', 'error');
+        return;
+      }
+      setCertificateOrder(res.order);
+    } catch (e) {
+      onNotify?.(e instanceof Error ? e.message : 'Could not load e-certificate', 'error');
+    } finally {
+      setCertificateLoadingId(null);
+    }
+  };
+
   const handleReorder = async (order: StoreOrder) => {
     if (!order.orderId || reorderingId) return;
     if (!getReorderableItems(order.items).length) {
@@ -212,6 +267,15 @@ export function OrdersListPage({
           className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#AEB4C0] hover:text-white hover:bg-white/5 disabled:opacity-50 cursor-pointer"
         >
           {invoiceLoadingId === order.orderId ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+        </button>
+        <button
+          type="button"
+          disabled={certificateLoadingId === order.orderId}
+          onClick={() => openCertificate(order)}
+          title="Download E-certificate"
+          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#AEB4C0] hover:text-white hover:bg-white/5 disabled:opacity-50 cursor-pointer"
+        >
+          {certificateLoadingId === order.orderId ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileBadge className="w-4 h-4" />}
         </button>
         {creditInvoiceId ? (
           <button
@@ -386,6 +450,7 @@ export function OrdersListPage({
         )}
       </div>
       {invoiceOrder ? <InvoiceModal order={invoiceOrder} onClose={() => setInvoiceOrder(null)} /> : null}
+      {certificateOrder ? <CertificateModal order={certificateOrder} onClose={() => setCertificateOrder(null)} /> : null}
     </AccountLayout>
   );
 }
@@ -405,6 +470,7 @@ export function OrderDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [certificateOpen, setCertificateOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionItem, setActionItem] = useState<{ item: StoreOrderItem; type: 'cancelled' | 'returninitialized' } | null>(null);
   const [reason, setReason] = useState('');
@@ -522,6 +588,11 @@ export function OrderDetailPage({
               <Download className="w-3.5 h-3.5" /> Invoice
             </button>
           )}
+          {order && (
+            <button type="button" onClick={() => setCertificateOpen(true)} className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-white/10 text-[#F7F4EC] text-xs font-bold uppercase cursor-pointer">
+              <FileBadge className="w-3.5 h-3.5" /> E-certificate
+            </button>
+          )}
           {canReorder && (
             <button type="button" disabled={reordering} onClick={handleReorder} className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#C8A45D] text-black text-xs font-bold uppercase cursor-pointer disabled:opacity-50">
               <RotateCcw className={`w-3.5 h-3.5 ${reordering ? 'animate-spin' : ''}`} />
@@ -610,6 +681,7 @@ export function OrderDetailPage({
       )}
 
       {invoiceOpen && order ? <InvoiceModal order={order} onClose={() => setInvoiceOpen(false)} /> : null}
+      {certificateOpen && order ? <CertificateModal order={order} onClose={() => setCertificateOpen(false)} /> : null}
     </AccountLayout>
   );
 }

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Product } from '../types';
 import { useAppDispatch } from '@/store/hooks';
 import { addProductToCart } from '@/store/cartSlice';
-import { productSearch } from '@/services/productService';
+import { productSearch, fetchCategories } from '@/services/productService';
 import { mapApiProductToProduct } from '@/utils/mapProduct';
+import type { CatalogCategory } from '@/types/apiProduct';
 
 interface ShopViewProps {
   wishlist: string[];
@@ -17,23 +18,84 @@ interface ShopViewProps {
 }
 
 const PAGE_SIZE = 9;
+/** Same ceiling Seniors uses — API treats 10000 as “no max price”. */
+const PRICE_CEILING = 10000;
+const PRICE_DEBOUNCE_MS = 300;
 
-const CATEGORIES = [
-  { label: 'All Catalog', value: 'all' },
-  { label: 'Rings', value: 'rings' },
-  { label: 'Chains', value: 'chains' },
-  { label: 'Necklaces', value: 'necklaces' },
-  { label: 'Bracelets', value: 'bracelets' },
-  { label: 'Earrings', value: 'earrings' },
-  { label: 'Pendants', value: 'pendants' },
-  { label: 'Coins', value: 'coins' },
-  { label: 'Bars', value: 'bars' },
-  { label: 'Estate / Antique', value: 'antique' },
-];
+type CatalogSort = 'featured' | 'price-asc' | 'price-desc' | 'weight-desc';
 
 function parsePage(raw: string | null) {
   const n = Number(raw);
   return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+}
+
+function parseMaxPrice(raw: string | null): number {
+  if (!raw) return PRICE_CEILING;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return PRICE_CEILING;
+  return Math.min(Math.floor(n), PRICE_CEILING);
+}
+
+function parseSort(raw: string | null): CatalogSort {
+  if (raw === 'price-asc' || raw === 'asc' || raw === 'price-low') return 'price-asc';
+  if (raw === 'price-desc' || raw === 'desc' || raw === 'price-high') return 'price-desc';
+  if (raw === 'weight-desc') return 'weight-desc';
+  return 'featured';
+}
+
+function sortToApi(sortBy: CatalogSort): '' | 'asc' | 'desc' {
+  if (sortBy === 'price-asc') return 'asc';
+  if (sortBy === 'price-desc') return 'desc';
+  return '';
+}
+
+function parseCategoriesParam(raw: string | null): string[] {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((s) => {
+      try {
+        return decodeURIComponent(s.trim());
+      } catch {
+        return s.trim();
+      }
+    })
+    .filter(Boolean);
+}
+
+function namesEqual(a: string, b: string) {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function createUrlSlug(value: string) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}
+
+function matchCategoryName(categories: CatalogCategory[], slugOrName?: string | null) {
+  if (!slugOrName || slugOrName === 'all') return '';
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(slugOrName);
+    } catch {
+      return slugOrName;
+    }
+  })();
+  const found =
+    categories.find((c) => c.id === decoded) ||
+    categories.find((c) => namesEqual(c.name, decoded)) ||
+    categories.find((c) => createUrlSlug(c.name) === createUrlSlug(decoded)) ||
+    categories.find((c) =>
+      c.subcategories.some((s) => namesEqual(s, decoded) || createUrlSlug(s) === createUrlSlug(decoded))
+    );
+  if (!found) return decoded;
+  const sub = found.subcategories.find(
+    (s) => namesEqual(s, decoded) || createUrlSlug(s) === createUrlSlug(decoded)
+  );
+  return sub || found.name;
 }
 
 function buildPageNumbers(current: number, total: number): Array<number | 'ellipsis'> {
@@ -59,23 +121,41 @@ export default function ShopView({
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
+    const fromMulti = parseCategoriesParam(searchParams.get('categories'));
+    if (fromMulti.length) return fromMulti;
+    const single = searchParams.get('category');
+    return single && single !== 'all' ? [single] : [];
+  });
   const [selectedKarat, setSelectedKarat] = useState(searchParams.get('karat') || 'all');
   const [selectedColor, setSelectedColor] = useState(searchParams.get('color') || 'all');
   const [selectedCondition, setSelectedCondition] = useState(searchParams.get('condition') || 'all');
-  const [priceRange, setPriceRange] = useState(Number(searchParams.get('maxPrice')) || 10000);
-  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'featured');
+  const [priceRange, setPriceRange] = useState(() => parseMaxPrice(searchParams.get('maxPrice')));
+  const [priceDraft, setPriceDraft] = useState(() => parseMaxPrice(searchParams.get('maxPrice')));
+  const [sortBy, setSortBy] = useState<CatalogSort>(() => parseSort(searchParams.get('sort')));
   const [currentPage, setCurrentPage] = useState(parsePage(searchParams.get('page')));
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
+  const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
+  const selectedCategoriesKey = selectedCategories.join('\0');
+  const priceDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const syncUrl = useCallback(
     (next: {
-      category?: string;
+      categories?: string[];
       karat?: string;
       color?: string;
       condition?: string;
@@ -89,14 +169,18 @@ export default function ShopView({
         else params.set(key, value);
       };
 
-      setOrDelete('category', next.category ?? activeCategory, ['all']);
+      const cats = next.categories ?? selectedCategories;
+      params.delete('category');
+      if (cats.length) params.set('categories', cats.join(','));
+      else params.delete('categories');
+
       setOrDelete('karat', next.karat ?? selectedKarat, ['all']);
       setOrDelete('color', next.color ?? selectedColor, ['all']);
       setOrDelete('condition', next.condition ?? selectedCondition, ['all']);
       setOrDelete('sort', next.sort ?? sortBy, ['featured']);
 
       const max = next.maxPrice ?? priceRange;
-      if (max < 10000) params.set('maxPrice', String(max));
+      if (max < PRICE_CEILING) params.set('maxPrice', String(max));
       else params.delete('maxPrice');
 
       const page = next.page ?? currentPage;
@@ -108,7 +192,7 @@ export default function ShopView({
     },
     [
       searchParams,
-      activeCategory,
+      selectedCategories,
       selectedKarat,
       selectedColor,
       selectedCondition,
@@ -130,9 +214,66 @@ export default function ShopView({
     [syncUrl],
   );
 
+  const resetToFirstPage = useCallback(
+    (next: Parameters<typeof syncUrl>[0]) => {
+      setCurrentPage(1);
+      syncUrl({ ...next, page: 1 });
+    },
+    [syncUrl],
+  );
+
+  /** Commit max price to API + URL (Seniors-style), always returning to page 1. */
+  const commitPrice = useCallback(
+    (max: number) => {
+      if (priceDebounceRef.current) {
+        clearTimeout(priceDebounceRef.current);
+        priceDebounceRef.current = null;
+      }
+      const next = parseMaxPrice(String(max));
+      setPriceDraft(next);
+      setPriceRange(next);
+      setCurrentPage(1);
+      syncUrl({ maxPrice: next, page: 1 });
+    },
+    [syncUrl],
+  );
+
+  const onPriceSliderChange = (value: number) => {
+    setPriceDraft(value);
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    priceDebounceRef.current = setTimeout(() => {
+      commitPrice(value);
+    }, PRICE_DEBOUNCE_MS);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCategories().then((list) => {
+      if (cancelled) return;
+      setCatalogCategories(list);
+      setCategoriesLoaded(true);
+      setSelectedCategories((prev) => {
+        if (!prev.length) return prev;
+        const resolved = prev
+          .map((value) => matchCategoryName(list, value))
+          .filter(Boolean);
+        return resolved.length ? Array.from(new Set(resolved)) : prev;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,39 +282,71 @@ export default function ShopView({
       setLoading(true);
       setError(null);
 
-      const sortprice =
-        sortBy === 'price-asc' ? 'asc' : sortBy === 'price-desc' ? 'desc' : '';
+      try {
+        const customFilters: Array<{
+          name: string;
+          type: string;
+          filtertype: string;
+          value: unknown;
+        }> = [];
+        if (selectedKarat !== 'all') {
+          customFilters.push({
+            name: 'attributes.purity',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedKarat,
+          });
+        }
+        if (selectedColor !== 'all') {
+          customFilters.push({
+            name: 'specifications.color',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedColor,
+          });
+        }
+        if (selectedCondition !== 'all') {
+          customFilters.push({
+            name: 'attributes.item_condition',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedCondition,
+          });
+        }
 
-      const result = await productSearch({
-        page: Math.max(0, currentPage - 1),
-        limit: PAGE_SIZE,
-        text: searchQuery || '',
-        category: activeCategory !== 'all' ? activeCategory : '',
-        maxPrice: priceRange < 10000 ? priceRange : '',
-        sortprice: sortprice as 'asc' | 'desc' | '',
-        showcount: true,
-      });
+        const result = await productSearch({
+          page: Math.max(0, currentPage - 1),
+          limit: PAGE_SIZE,
+          text: debouncedSearch || '',
+          category: selectedCategories.length ? selectedCategories : undefined,
+          // Seniors: ceiling → 10000 so BFF skips the price To filter
+          maxPrice: priceRange >= PRICE_CEILING ? 10000 : priceRange,
+          sortprice: sortToApi(sortBy),
+          showcount: true,
+          customFilters,
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (result.error) {
-        setProducts([]);
-        setTotalProducts(0);
-        setError(result.message || 'Failed to load products');
-        setLoading(false);
-        return;
+        if (result.error) {
+          setProducts([]);
+          setTotalProducts(0);
+          setError(result.message || 'Failed to load products');
+          return;
+        }
+
+        setProducts(result.productsList.map(mapApiProductToProduct));
+        setTotalProducts(result.totalProducts);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      setProducts(result.productsList.map(mapApiProductToProduct));
-      setTotalProducts(result.totalProducts);
-      setLoading(false);
     }
 
     load();
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, activeCategory, priceRange, sortBy, currentPage]);
+  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
 
@@ -183,16 +356,12 @@ export default function ShopView({
     }
   }, [loading, totalProducts, currentPage, totalPages, goToPage]);
 
+  // Karat/color/condition go to the API.
+  // Price is filtered by API and tightened locally because BFF To-price can overshoot.
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        if (selectedKarat !== 'all') {
-          const want = selectedKarat.toUpperCase();
-          if (product.karat.toUpperCase() !== want) return false;
-        }
-        if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
-        if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
-        if (product.price > priceRange) return false;
+        if (priceRange < PRICE_CEILING && product.price > priceRange) return false;
         return true;
       })
       .sort((a, b) => {
@@ -201,7 +370,7 @@ export default function ShopView({
         if (sortBy === 'price-desc') return b.price - a.price;
         return 0;
       });
-  }, [products, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy]);
+  }, [products, priceRange, sortBy]);
 
   const rangeStart = totalProducts === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalProducts);
@@ -225,19 +394,38 @@ export default function ShopView({
   };
 
   const clearFilters = () => {
-    setActiveCategory('all');
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    setSelectedCategories([]);
     setSelectedKarat('all');
     setSelectedColor('all');
     setSelectedCondition('all');
-    setPriceRange(10000);
+    setPriceRange(PRICE_CEILING);
+    setPriceDraft(PRICE_CEILING);
     setSortBy('featured');
     setCurrentPage(1);
     router.replace(pathname, { scroll: false });
   };
 
-  const resetToFirstPage = (next: Parameters<typeof syncUrl>[0]) => {
+  const isCategorySelected = (name: string) =>
+    selectedCategories.some((c) => namesEqual(c, name));
+
+  const toggleCategory = (name: string) => {
+    const exists = isCategorySelected(name);
+    const next = exists
+      ? selectedCategories.filter((c) => !namesEqual(c, name))
+      : [...selectedCategories, name];
+    setSelectedCategories(next);
     setCurrentPage(1);
-    syncUrl({ ...next, page: 1 });
+    syncUrl({ categories: next, page: 1 });
+  };
+
+  const toggleExpanded = (name: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
   };
 
   return (
@@ -258,18 +446,70 @@ export default function ShopView({
 
               <div className="space-y-1.5">
                 <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Category</label>
-                <select
-                  value={activeCategory}
-                  onChange={(e) => {
-                    setActiveCategory(e.target.value);
-                    resetToFirstPage({ category: e.target.value });
-                  }}
-                  className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
+                <div className="space-y-1 max-h-[22rem] overflow-y-auto pr-1">
+                  {!categoriesLoaded ? (
+                    <p className="text-sm text-[#6B7280] py-1">Loading categories…</p>
+                  ) : catalogCategories.length === 0 ? (
+                    <p className="text-sm text-[#6B7280] py-1">No categories found</p>
+                  ) : (
+                    catalogCategories.map((cat) => {
+                      const hasSubcats = cat.subcategories.length > 0;
+                      const isExpanded = expandedCategories.has(cat.name);
+                      const isSelected = isCategorySelected(cat.name);
+                      return (
+                        <div key={cat.id} className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            {hasSubcats ? (
+                              <button
+                                type="button"
+                                onClick={() => toggleExpanded(cat.name)}
+                                className="shrink-0 w-4 h-4 flex items-center justify-center text-[#6B7280] hover:text-[#C8A45D] cursor-pointer"
+                                aria-label={isExpanded ? `Collapse ${cat.name}` : `Expand ${cat.name}`}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="w-3 h-3" />
+                                ) : (
+                                  <ChevronRight className="w-3 h-3" />
+                                )}
+                              </button>
+                            ) : (
+                              <span className="w-4 shrink-0" />
+                            )}
+                            <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {
+                                  toggleCategory(cat.name);
+                                  if (hasSubcats && !isExpanded) {
+                                    setExpandedCategories((prev) => new Set(prev).add(cat.name));
+                                  }
+                                }}
+                                className="w-4 h-4 accent-[#C8A45D] rounded border-white/20 bg-[#11141A] shrink-0"
+                              />
+                              <span className="text-[13px] text-[#F7F4EC] truncate">{cat.name}</span>
+                            </label>
+                          </div>
+                          {hasSubcats && isExpanded && (
+                            <div className="ml-6 pl-2 border-l border-white/10 space-y-1">
+                              {cat.subcategories.map((sub) => (
+                                <label key={sub} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={isCategorySelected(sub)}
+                                    onChange={() => toggleCategory(sub)}
+                                    className="w-4 h-4 accent-[#C8A45D] rounded border-white/20 bg-[#11141A] shrink-0"
+                                  />
+                                  <span className="text-[12px] text-[#AEB4C0]">{sub}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -319,7 +559,7 @@ export default function ShopView({
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Conditions</option>
-                  <option value="Brand New">Brand New</option>
+                  <option value="New">Brand New</option>
                   <option value="Excellent">Excellent</option>
                   <option value="Vintage">Vintage</option>
                   <option value="Estate">Estate</option>
@@ -329,19 +569,25 @@ export default function ShopView({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <label className="text-[13px] uppercase tracking-wider text-[#AEB4C0] font-bold">Max Price</label>
-                  <span className="text-sm font-bold text-[#C8A45D]">${priceRange.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-[#C8A45D]">
+                    {priceDraft >= PRICE_CEILING ? 'Any' : `$${priceDraft.toLocaleString()}`}
+                  </span>
                 </div>
                 <input
                   type="range"
                   min={50}
-                  max={10000}
+                  max={PRICE_CEILING}
                   step={50}
-                  value={priceRange}
-                  onChange={(e) => setPriceRange(Number(e.target.value))}
-                  onMouseUp={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
-                  onTouchEnd={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
+                  value={priceDraft}
+                  onChange={(e) => onPriceSliderChange(Number(e.target.value))}
+                  onMouseUp={(e) => commitPrice(Number((e.target as HTMLInputElement).value))}
+                  onTouchEnd={(e) => commitPrice(Number((e.target as HTMLInputElement).value))}
                   className="w-full accent-[#C8A45D] cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[#6B7280]">
+                  <span>$50</span>
+                  <span>${PRICE_CEILING.toLocaleString()}</span>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -349,8 +595,9 @@ export default function ShopView({
                 <select
                   value={sortBy}
                   onChange={(e) => {
-                    setSortBy(e.target.value);
-                    resetToFirstPage({ sort: e.target.value });
+                    const next = parseSort(e.target.value);
+                    setSortBy(next);
+                    resetToFirstPage({ sort: next });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
