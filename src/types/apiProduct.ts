@@ -28,6 +28,21 @@ export interface ApiProduct {
   [key: string]: unknown;
 }
 
+export interface ApiCategory {
+  _id?: string;
+  name: string;
+  display_name?: string;
+  image?: string;
+  imagethumb?: string;
+  subcategories?: Array<string | { name: string }>;
+}
+
+export interface CatalogCategory {
+  id: string;
+  name: string;
+  subcategories: string[];
+}
+
 export interface ProductSearchParams {
   page?: number;
   limit?: number;
@@ -36,7 +51,8 @@ export interface ProductSearchParams {
   /** @deprecated Prefer sku */
   osku?: string;
   text?: string;
-  category?: string;
+  /** Category name(s) from GET prod/categories — sent as attributes.category list. */
+  category?: string | string[];
   minPrice?: string | number;
   maxPrice?: string | number;
   sortprice?: 'asc' | 'desc' | '';

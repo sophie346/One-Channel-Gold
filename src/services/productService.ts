@@ -1,11 +1,53 @@
 import { PRODUCT_BASE_URL, CLIENT_NAME } from '@/utils/constants';
 import { getOneautoApiHeaders } from '@/utils/apiHeaders';
 import type {
+  ApiCategory,
   ApiProduct,
+  CatalogCategory,
   ProductSearchParams,
   ProductSearchResult,
 } from '@/types/apiProduct';
-import { toApiCategory } from '@/utils/mapProduct';
+import { bffRequest } from '@/services/bffClient';
+
+function toCategoryValues(category?: string | string[]): string[] {
+  if (!category) return [];
+  const raw = Array.isArray(category) ? category : String(category).split(',');
+  return raw
+    .map((s) => String(s || '').trim())
+    .filter((s) => s && s.toLowerCase() !== 'all');
+}
+
+function mapApiCategory(c: ApiCategory, index: number): CatalogCategory {
+  const name = String(c.display_name || c.name || '').trim();
+  const id = String(c._id || name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `cat-${index}`);
+  const subs = (c.subcategories || [])
+    .map((s) => (typeof s === 'string' ? s : s?.name))
+    .map((s) => String(s || '').trim())
+    .filter(Boolean);
+  return { id, name, subcategories: subs };
+}
+
+/** GET prod/categories — same source Seniors uses for the catalog sidebar. */
+export async function fetchCategories(token?: string | null): Promise<CatalogCategory[]> {
+  try {
+    const data = await bffRequest<unknown>('prod/categories', {
+      method: 'GET',
+      extraHeaders: token ? { authorization: `Bearer ${token}` } : {},
+    });
+    const list = Array.isArray(data)
+      ? data
+      : Array.isArray((data as { categories?: unknown[] })?.categories)
+        ? (data as { categories: unknown[] }).categories
+        : Array.isArray((data as { data?: unknown[] })?.data)
+          ? (data as { data: unknown[] }).data
+          : [];
+    return (list as ApiCategory[])
+      .map((c, i) => mapApiCategory(c, i))
+      .filter((c) => c.name);
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Catalog search — same contract as Nexus `ProductSearch`:
@@ -22,7 +64,7 @@ export async function productSearch(
     sku = '',
     osku = '',
     text = '',
-    category = '',
+    category,
     minPrice = '',
     maxPrice = '',
     sortprice = '',
@@ -51,13 +93,13 @@ export async function productSearch(
     });
   }
 
-  const apiCategory = toApiCategory(String(category || ''));
-  if (apiCategory) {
+  const categoryValues = toCategoryValues(category);
+  if (categoryValues.length) {
     filters.push({
       name: 'attributes.category',
       type: 'list',
       filtertype: 'Equals',
-      value: [apiCategory],
+      value: categoryValues,
     });
   }
 
