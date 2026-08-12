@@ -129,9 +129,8 @@ export const OrderInvoiceDocument = forwardRef<HTMLDivElement, { order: StoreOrd
   }
 );
 
-export function printOrderInvoice(el: HTMLElement | null, orderId?: string) {
+export function printHtmlDocument(el: HTMLElement | null, title: string) {
   if (!el || typeof window === 'undefined') return;
-  const title = `Invoice-${orderId || 'order'}`;
   const w = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
   if (!w) return;
   w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
@@ -140,10 +139,14 @@ export function printOrderInvoice(el: HTMLElement | null, orderId?: string) {
       table { width: 100%; border-collapse: collapse; }
       th, td { padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
       th { background: #f8fafc; }
-      .text-right { text-align: right; }
+      img { max-width: 100%; height: auto; }
       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
     </style></head><body>${el.innerHTML}</body></html>`);
   w.document.close();
   w.focus();
   setTimeout(() => w.print(), 250);
+}
+
+export function printOrderInvoice(el: HTMLElement | null, orderId?: string) {
+  printHtmlDocument(el, `Invoice-${orderId || 'order'}`);
 }
