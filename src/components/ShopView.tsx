@@ -305,6 +305,14 @@ export default function ShopView({
             value: selectedColor,
           });
         }
+        if (selectedCondition !== 'all') {
+          customFilters.push({
+            name: 'attributes.item_condition',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedCondition,
+          });
+        }
 
         const result = await productSearch({
           page: Math.max(0, currentPage - 1),
@@ -338,7 +346,7 @@ export default function ShopView({
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, selectedColor, priceRange, sortBy, currentPage]);
+  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
 
@@ -348,12 +356,11 @@ export default function ShopView({
     }
   }, [loading, totalProducts, currentPage, totalPages, goToPage]);
 
-  // Condition stays client-side. Karat/color go to the API.
+  // Karat/color/condition go to the API.
   // Price is filtered by API and tightened locally because BFF To-price can overshoot.
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
         if (priceRange < PRICE_CEILING && product.price > priceRange) return false;
         return true;
       })
@@ -363,7 +370,7 @@ export default function ShopView({
         if (sortBy === 'price-desc') return b.price - a.price;
         return 0;
       });
-  }, [products, selectedCondition, priceRange, sortBy]);
+  }, [products, priceRange, sortBy]);
 
   const rangeStart = totalProducts === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalProducts);
@@ -552,7 +559,7 @@ export default function ShopView({
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
                   <option value="all">All Conditions</option>
-                  <option value="Brand New">Brand New</option>
+                  <option value="New">Brand New</option>
                   <option value="Excellent">Excellent</option>
                   <option value="Vintage">Vintage</option>
                   <option value="Estate">Estate</option>
