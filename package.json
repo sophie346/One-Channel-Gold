@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start --port 3000",
     "lint": "tsc --noEmit",
-    "kubernet-deploy": "gcloud builds submit --config=cloudbuild.yaml --project=gentle-epoch-277301 && kubectl rollout restart deployment/onechanneladmin-gold && kubectl rollout status deployment/onechanneladmin-gold"
+    "kubernet-deploy": "gcloud builds submit --config=cloudbuild.yaml --project=gentle-epoch-277301 . && kubectl rollout restart deployment/onechanneladmin-gold && kubectl rollout status deployment/onechanneladmin-gold"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
