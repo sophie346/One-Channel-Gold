@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2 } from 'lucide-react';
+import { ShoppingCart, Heart, ShieldAlert, SlidersHorizontal, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
 import { useAppDispatch } from '@/store/hooks';
 import { addProductToCart } from '@/store/cartSlice';
@@ -16,6 +16,8 @@ interface ShopViewProps {
   onShowNotification?: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
+const PAGE_SIZE = 9;
+
 const CATEGORIES = [
   { label: 'All Catalog', value: 'all' },
   { label: 'Rings', value: 'rings' },
@@ -28,6 +30,23 @@ const CATEGORIES = [
   { label: 'Bars', value: 'bars' },
   { label: 'Estate / Antique', value: 'antique' },
 ];
+
+function parsePage(raw: string | null) {
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+}
+
+function buildPageNumbers(current: number, total: number): Array<number | 'ellipsis'> {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: Array<number | 'ellipsis'> = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  if (start > 2) pages.push('ellipsis');
+  for (let i = start; i <= end; i += 1) pages.push(i);
+  if (end < total - 1) pages.push('ellipsis');
+  pages.push(total);
+  return pages;
+}
 
 export default function ShopView({
   wishlist,
@@ -46,6 +65,7 @@ export default function ShopView({
   const [selectedCondition, setSelectedCondition] = useState(searchParams.get('condition') || 'all');
   const [priceRange, setPriceRange] = useState(Number(searchParams.get('maxPrice')) || 10000);
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'featured');
+  const [currentPage, setCurrentPage] = useState(parsePage(searchParams.get('page')));
   const [showFilters, setShowFilters] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -61,6 +81,7 @@ export default function ShopView({
       condition?: string;
       maxPrice?: number;
       sort?: string;
+      page?: number;
     }) => {
       const params = new URLSearchParams(searchParams.toString());
       const setOrDelete = (key: string, value: string, emptyValues: string[]) => {
@@ -78,6 +99,10 @@ export default function ShopView({
       if (max < 10000) params.set('maxPrice', String(max));
       else params.delete('maxPrice');
 
+      const page = next.page ?? currentPage;
+      if (page > 1) params.set('page', String(page));
+      else params.delete('page');
+
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
@@ -89,10 +114,25 @@ export default function ShopView({
       selectedCondition,
       sortBy,
       priceRange,
+      currentPage,
       pathname,
       router,
     ],
   );
+
+  const goToPage = useCallback(
+    (page: number) => {
+      const next = Math.max(1, page);
+      setCurrentPage(next);
+      syncUrl({ page: next });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [syncUrl],
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,8 +145,8 @@ export default function ShopView({
         sortBy === 'price-asc' ? 'asc' : sortBy === 'price-desc' ? 'desc' : '';
 
       const result = await productSearch({
-        page: 0,
-        limit: 48,
+        page: Math.max(0, currentPage - 1),
+        limit: PAGE_SIZE,
         text: searchQuery || '',
         category: activeCategory !== 'all' ? activeCategory : '',
         maxPrice: priceRange < 10000 ? priceRange : '',
@@ -133,7 +173,15 @@ export default function ShopView({
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, activeCategory, priceRange, sortBy]);
+  }, [searchQuery, activeCategory, priceRange, sortBy, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
+
+  useEffect(() => {
+    if (!loading && totalProducts > 0 && currentPage > totalPages) {
+      goToPage(totalPages);
+    }
+  }, [loading, totalProducts, currentPage, totalPages, goToPage]);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -154,6 +202,9 @@ export default function ShopView({
         return 0;
       });
   }, [products, selectedKarat, selectedColor, selectedCondition, priceRange, sortBy]);
+
+  const rangeStart = totalProducts === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalProducts);
 
   const openProduct = (product: Product) => {
     const slug = product.slug || product.sku || product.osku || product.id;
@@ -180,7 +231,13 @@ export default function ShopView({
     setSelectedCondition('all');
     setPriceRange(10000);
     setSortBy('featured');
+    setCurrentPage(1);
     router.replace(pathname, { scroll: false });
+  };
+
+  const resetToFirstPage = (next: Parameters<typeof syncUrl>[0]) => {
+    setCurrentPage(1);
+    syncUrl({ ...next, page: 1 });
   };
 
   return (
@@ -205,7 +262,7 @@ export default function ShopView({
                   value={activeCategory}
                   onChange={(e) => {
                     setActiveCategory(e.target.value);
-                    syncUrl({ category: e.target.value });
+                    resetToFirstPage({ category: e.target.value });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
@@ -221,7 +278,7 @@ export default function ShopView({
                   value={selectedKarat}
                   onChange={(e) => {
                     setSelectedKarat(e.target.value);
-                    syncUrl({ karat: e.target.value });
+                    resetToFirstPage({ karat: e.target.value });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
@@ -240,7 +297,7 @@ export default function ShopView({
                   value={selectedColor}
                   onChange={(e) => {
                     setSelectedColor(e.target.value);
-                    syncUrl({ color: e.target.value });
+                    resetToFirstPage({ color: e.target.value });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
@@ -257,7 +314,7 @@ export default function ShopView({
                   value={selectedCondition}
                   onChange={(e) => {
                     setSelectedCondition(e.target.value);
-                    syncUrl({ condition: e.target.value });
+                    resetToFirstPage({ condition: e.target.value });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
@@ -281,8 +338,8 @@ export default function ShopView({
                   step={50}
                   value={priceRange}
                   onChange={(e) => setPriceRange(Number(e.target.value))}
-                  onMouseUp={(e) => syncUrl({ maxPrice: Number((e.target as HTMLInputElement).value) })}
-                  onTouchEnd={(e) => syncUrl({ maxPrice: Number((e.target as HTMLInputElement).value) })}
+                  onMouseUp={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
+                  onTouchEnd={(e) => resetToFirstPage({ maxPrice: Number((e.target as HTMLInputElement).value) })}
                   className="w-full accent-[#C8A45D] cursor-pointer"
                 />
               </div>
@@ -293,7 +350,7 @@ export default function ShopView({
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
-                    syncUrl({ sort: e.target.value });
+                    resetToFirstPage({ sort: e.target.value });
                   }}
                   className="w-full bg-[#11141A] border border-white/10 rounded p-2.5 text-sm text-[#F7F4EC] focus:outline-none"
                 >
@@ -326,8 +383,10 @@ export default function ShopView({
           <div className="lg:col-span-9">
             {!loading && !error && (
               <p className="text-sm text-[#AEB4C0] mb-4 uppercase tracking-wider">
-                Showing {filteredProducts.length}
-                {totalProducts > 0 ? ` · ${totalProducts} in catalog` : ''}
+                {totalProducts > 0
+                  ? `Showing ${rangeStart}–${rangeEnd} of ${totalProducts}`
+                  : 'Showing 0'}
+                {` · ${PAGE_SIZE} per page`}
               </p>
             )}
 
@@ -343,6 +402,7 @@ export default function ShopView({
                 <p className="text-sm text-[#AEB4C0] max-w-sm mx-auto">{error}</p>
               </div>
             ) : filteredProducts.length > 0 ? (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
                   const isWishlisted = wishlist.includes(product.id);
@@ -434,6 +494,59 @@ export default function ShopView({
                   );
                 })}
               </div>
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 pt-6"
+                  aria-label="Product pagination"
+                >
+                  <p className="text-sm text-[#AEB4C0]">
+                    Page {currentPage} of {totalPages}
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={currentPage <= 1 || loading}
+                      onClick={() => goToPage(currentPage - 1)}
+                      className="inline-flex items-center gap-1 h-10 px-3 rounded-lg border border-white/10 text-sm text-[#AEB4C0] hover:text-white hover:border-[#C8A45D]/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Prev
+                    </button>
+                    {buildPageNumbers(currentPage, totalPages).map((item, idx) =>
+                      item === 'ellipsis' ? (
+                        <span key={`e-${idx}`} className="px-2 text-[#6B7280]">
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={item}
+                          type="button"
+                          disabled={loading}
+                          onClick={() => goToPage(item)}
+                          className={`min-w-10 h-10 px-2 rounded-lg text-sm font-bold cursor-pointer disabled:opacity-40 ${
+                            item === currentPage
+                              ? 'bg-[#C8A45D] text-black'
+                              : 'border border-white/10 text-[#AEB4C0] hover:text-white hover:border-[#C8A45D]/40'
+                          }`}
+                        >
+                          {item}
+                        </button>
+                      )
+                    )}
+                    <button
+                      type="button"
+                      disabled={currentPage >= totalPages || loading}
+                      onClick={() => goToPage(currentPage + 1)}
+                      className="inline-flex items-center gap-1 h-10 px-3 rounded-lg border border-white/10 text-sm text-[#AEB4C0] hover:text-white hover:border-[#C8A45D]/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </nav>
+              )}
+              </>
             ) : (
               <div className="p-12 text-center bg-[#171A21] border border-[rgba(255,255,255,0.06)] rounded-xl space-y-3">
                 <ShieldAlert className="w-8 h-8 text-[#D29B3C] mx-auto" />
