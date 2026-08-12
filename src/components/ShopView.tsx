@@ -283,17 +283,28 @@ export default function ShopView({
       setError(null);
 
       try {
-        const customFilters =
-          selectedKarat !== 'all'
-            ? [
-                {
-                  name: 'attributes.purity',
-                  type: 'string',
-                  filtertype: 'Equals',
-                  value: selectedKarat,
-                },
-              ]
-            : [];
+        const customFilters: Array<{
+          name: string;
+          type: string;
+          filtertype: string;
+          value: unknown;
+        }> = [];
+        if (selectedKarat !== 'all') {
+          customFilters.push({
+            name: 'attributes.purity',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedKarat,
+          });
+        }
+        if (selectedColor !== 'all') {
+          customFilters.push({
+            name: 'specifications.color',
+            type: 'string',
+            filtertype: 'Equals',
+            value: selectedColor,
+          });
+        }
 
         const result = await productSearch({
           page: Math.max(0, currentPage - 1),
@@ -327,7 +338,7 @@ export default function ShopView({
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, priceRange, sortBy, currentPage]);
+  }, [debouncedSearch, selectedCategoriesKey, selectedKarat, selectedColor, priceRange, sortBy, currentPage]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
 
@@ -337,12 +348,11 @@ export default function ShopView({
     }
   }, [loading, totalProducts, currentPage, totalPages, goToPage]);
 
-  // Color/condition stay client-side. Karat purity is API-only via attributes.purity.
+  // Condition stays client-side. Karat/color go to the API.
   // Price is filtered by API and tightened locally because BFF To-price can overshoot.
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        if (selectedColor !== 'all' && product.metalColor !== selectedColor) return false;
         if (selectedCondition !== 'all' && product.condition !== selectedCondition) return false;
         if (priceRange < PRICE_CEILING && product.price > priceRange) return false;
         return true;
@@ -353,7 +363,7 @@ export default function ShopView({
         if (sortBy === 'price-desc') return b.price - a.price;
         return 0;
       });
-  }, [products, selectedColor, selectedCondition, priceRange, sortBy]);
+  }, [products, selectedCondition, priceRange, sortBy]);
 
   const rangeStart = totalProducts === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalProducts);
