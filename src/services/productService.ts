@@ -158,7 +158,7 @@ export async function productSearch(
         totalProducts: 0,
         error: true,
         message:
-          'Missing NEXT_PUBLIC_CLIENT_NAME. Set it in .env.local (same as Nexus Client_Name).',
+          'Missing CLIENT_NAME (set in src/utils/constants.ts).',
       };
     }
 
